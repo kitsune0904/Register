@@ -1,0 +1,2995 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ระบบรับสมัครเรียนออนไลน์ (โควตา) 2570 | วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์</title>
+  
+  <!-- CSS, Font Sarabun, Tailwind CDN, Chart.js -->
+  
+<!-- BEGIN css -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Chart.js CDN สำหรับแอดมินแดชบอร์ด -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Sarabun', 'sans-serif'],
+        },
+        colors: {
+          brand: {
+            50: '#f0f9ff',
+            100: '#e0f2fe',
+            500: '#0284c7',
+            600: '#0369a1',
+            700: '#075985',
+            800: '#0c4a6e',
+            900: '#082f49',
+          }
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  body {
+    font-family: 'Sarabun', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: #f8fafc;
+  }
+  
+  /* สไตล์ตัวโหลด (Loading Spinner) */
+  .spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid #0284c7;
+    width: 24px;
+    height: 24px;
+    -webkit-animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
+  }
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Transition นุ่มนวลสำหรับการสลับ Step */
+  .step-transition {
+    transition: all 0.3s ease-in-out;
+  }
+
+  /* ซ่อน scrollbar ใน mobile tab */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+
+<!-- END css -->
+
+  
+  <!-- Thai Address Autocomplete Data -->
+  
+<!-- BEGIN js_address_data -->
+<script>
+/**
+ * ข้อมูลที่อยู่ไทยแบบกระชับ (เน้นสระบุรี ลพบุรี พระนครศรีอยุธยา ปทุมธานี นครราชสีมา กทม. และหัวเมืองหลัก)
+ * พร้อมระบบ Autocomplete รหัสไปรษณีย์ ตำบล อำเภอ จังหวัด
+ */
+const THAI_ADDRESS_DATA = [
+  // สระบุรี
+  { d: 'บ้านหมอ', s: 'บ้านหมอ', p: 'สระบุรี', z: '18130' },
+  { d: 'บ้านหมอ', s: 'บ้านครัว', p: 'สระบุรี', z: '18270' },
+  { d: 'บ้านหมอ', s: 'ท่าลาน', p: 'สระบุรี', z: '18270' },
+  { d: 'บ้านหมอ', s: 'ตลาดน้อย', p: 'สระบุรี', z: '18130' },
+  { d: 'บ้านหมอ', s: 'บางโขมด', p: 'สระบุรี', z: '18130' },
+  { d: 'บ้านหมอ', s: 'สร่างโศก', p: 'สระบุรี', z: '18270' },
+  { d: 'บ้านหมอ', s: 'หนองบัว', p: 'สระบุรี', z: '18130' },
+  { d: 'บ้านหมอ', s: 'หรเทพ', p: 'สระบุรี', z: '18130' },
+  { d: 'บ้านหมอ', s: 'โคกใหญ่', p: 'สระบุรี', z: '18130' },
+  { d: 'เมืองสระบุรี', s: 'ปากเพรียว', p: 'สระบุรี', z: '18000' },
+  { d: 'เมืองสระบุรี', s: 'ดาวเรือง', p: 'สระบุรี', z: '18000' },
+  { d: 'เมืองสระบุรี', s: 'นาโฉง', p: 'สระบุรี', z: '18000' },
+  { d: 'เมืองสระบุรี', s: 'โคกสว่าง', p: 'สระบุรี', z: '18000' },
+  { d: 'พระพุทธบาท', s: 'พระพุทธบาท', p: 'สระบุรี', z: '18120' },
+  { d: 'พระพุทธบาท', s: 'ขุนโขลน', p: 'สระบุรี', z: '18120' },
+  { d: 'พระพุทธบาท', s: 'ธารเกษม', p: 'สระบุรี', z: '18120' },
+  { d: 'พระพุทธบาท', s: 'พุคำจาน', p: 'สระบุรี', z: '18120' },
+  { d: 'แก่งคอย', s: 'แก่งคอย', p: 'สระบุรี', z: '18110' },
+  { d: 'แก่งคอย', s: 'ทับกวาง', p: 'สระบุรี', z: '18260' },
+  { d: 'หนองแค', s: 'หนองแค', p: 'สระบุรี', z: '18140' },
+  { d: 'หนองแค', s: 'ห้วยขมิ้น', p: 'สระบุรี', z: '18230' },
+  { d: 'วิหารแดง', s: 'วิหารแดง', p: 'สระบุรี', z: '18150' },
+  { d: 'หนองแซง', s: 'หนองแซง', p: 'สระบุรี', z: '18170' },
+  { d: 'มวกเหล็ก', s: 'มวกเหล็ก', p: 'สระบุรี', z: '18180' },
+  { d: 'เสาไห้', s: 'เสาไห้', p: 'สระบุรี', z: '18160' },
+  { d: 'ดอนพุด', s: 'ดอนพุด', p: 'สระบุรี', z: '18210' },
+  { d: 'วังม่วง', s: 'วังม่วง', p: 'สระบุรี', z: '18220' },
+  { d: 'เฉลิมพระเกียรติ', s: 'เขาดินพัฒนา', p: 'สระบุรี', z: '18000' },
+  
+  // ลพบุรี
+  { d: 'เมืองลพบุรี', s: 'ทะเลชุบศร', p: 'ลพบุรี', z: '15000' },
+  { d: 'เมืองลพบุรี', s: 'ท่าหิน', p: 'ลพบุรี', z: '15000' },
+  { d: 'เมืองลพบุรี', s: 'เขาสามยอด', p: 'ลพบุรี', z: '15000' },
+  { d: 'ท่าวุ้ง', s: 'ท่าวุ้ง', p: 'ลพบุรี', z: '15150' },
+  { d: 'บ้านหมี่', s: 'บ้านหมี่', p: 'ลพบุรี', z: '15110' },
+  { d: 'พัฒนานิคม', s: 'พัฒนานิคม', p: 'ลพบุรี', z: '15140' },
+  { d: 'ชัยบาดาล', s: 'ลำนารายณ์', p: 'ลพบุรี', z: '15130' },
+
+  // พระนครศรีอยุธยา
+  { d: 'พระนครศรีอยุธยา', s: 'ประตูชัย', p: 'พระนครศรีอยุธยา', z: '13000' },
+  { d: 'ท่าเรือ', s: 'ท่าเรือ', p: 'พระนครศรีอยุธยา', z: '13130' },
+  { d: 'ท่าเรือ', s: 'ท่าหลวง', p: 'พระนครศรีอยุธยา', z: '13130' },
+  { d: 'ท่าเรือ', s: 'จำปา', p: 'พระนครศรีอยุธยา', z: '13130' },
+  { d: 'นครหลวง', s: 'นครหลวง', p: 'พระนครศรีอยุธยา', z: '13260' },
+  { d: 'ภาชี', s: 'ภาชี', p: 'พระนครศรีอยุธยา', z: '13140' },
+  { d: 'วังน้อย', s: 'วังน้อย', p: 'พระนครศรีอยุธยา', z: '13170' },
+  { d: 'อุทัย', s: 'อุทัย', p: 'พระนครศรีอยุธยา', z: '13210' },
+  { d: 'เสนา', s: 'เสนา', p: 'พระนครศรีอยุธยา', z: '13110' },
+  { d: 'บางปะอิน', s: 'บ้านเลน', p: 'พระนครศรีอยุธยา', z: '13160' }
+];
+
+/**
+ * ฟังก์ชันค้นหาที่อยู่อัตโนมัติจากคำค้นหา (ตำบล หรือ อำเภอ หรือ รหัสไปรษณีย์)
+ */
+function searchThaiAddress(query) {
+  if (!query || query.trim().length < 2) return [];
+  const q = query.trim().toLowerCase();
+  return THAI_ADDRESS_DATA.filter(item => 
+    item.s.toLowerCase().includes(q) ||
+    item.d.toLowerCase().includes(q) ||
+    item.p.toLowerCase().includes(q) ||
+    item.z.includes(q)
+  ).slice(0, 8); // จำกัด 8 รายการเพื่อความเร็ว
+}
+</script>
+
+<!-- END js_address_data -->
+
+</head>
+<body class="min-h-full flex flex-col text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- ============================================================== -->
+  <!-- Top Navigation Header -->
+  <!-- ============================================================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm backdrop-blur-md bg-white/95">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo & College Name -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchToTab('form')">
+          <div class="w-10 h-10 rounded-xl bg-brand-700 text-white flex items-center justify-center font-bold text-xl shadow-md border border-brand-800">
+            ท.ส.
+          </div>
+          <div>
+            <h1 class="text-sm md:text-base font-bold text-slate-900 leading-tight">วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์</h1>
+            <p class="text-[11px] text-slate-500 font-medium">ระบบรับสมัครเรียนออนไลน์ (โควตา) ประจำปีการศึกษา 2570</p>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs (Desktop & Tablet) -->
+        <nav class="hidden md:flex items-center space-x-1">
+          <button type="button" id="navTabForm" onclick="switchToTab('form')" 
+                  class="nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold text-brand-700 bg-brand-50 transition flex items-center gap-1.5">
+            <span>📝</span> ยื่นใบสมัครโควตา
+          </button>
+          <button type="button" id="navTabStatus" onclick="switchToTab('status')" 
+                  class="nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold text-slate-600 hover:text-brand-600 hover:bg-slate-50 transition flex items-center gap-1.5">
+            <span>🔍</span> ตรวจสอบสถานะ
+          </button>
+          <button type="button" id="navTabAdmin" onclick="switchToTab('admin')" 
+                  class="nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold text-slate-600 hover:text-brand-600 hover:bg-slate-50 transition flex items-center gap-1.5">
+            <span>🔐</span> ระบบเจ้าหน้าที่
+          </button>
+        </nav>
+
+        <!-- Mobile Menu Pill Button -->
+        <div class="flex md:hidden items-center gap-1">
+          <button type="button" onclick="switchToTab('form')" class="mobile-tab-btn p-2 rounded-lg text-xs font-bold text-brand-700 bg-brand-50">
+            สมัคร
+          </button>
+          <button type="button" onclick="switchToTab('status')" class="mobile-tab-btn p-2 rounded-lg text-xs font-medium text-slate-600">
+            สถานะ
+          </button>
+          <button type="button" onclick="switchToTab('admin')" class="mobile-tab-btn p-2 rounded-lg text-xs font-medium text-slate-600">
+            จนท.
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- Main Content Area -->
+  <!-- ============================================================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+    
+    <!-- แท็บที่ 1: ฟอร์มยื่นใบสมัคร (Phase 1) -->
+    <section id="tab-form-content" class="tab-view">
+      
+<!-- BEGIN applicant_form -->
+<!-- ฟอร์มรับสมัครเรียนออนไลน์ (โควตา) Multi-Step Form (Phase 1) -->
+<div id="formSection" class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 transition-all">
+  
+  <!-- Form Header Banner -->
+  <div class="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 p-6 md:p-8 text-white relative">
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white/20">
+        🎓
+      </div>
+      <div>
+        <span class="inline-block px-3 py-1 bg-amber-400 text-brand-900 rounded-full text-xs font-bold uppercase tracking-wider mb-1">
+          ปีการศึกษา 2570
+        </span>
+        <h2 class="text-xl md:text-2xl font-bold tracking-tight">ใบสมัครเพื่อศึกษาต่อเป็นกรณีพิเศษ (โควตา)</h2>
+        <p class="text-brand-100 text-xs md:text-sm mt-0.5">วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์</p>
+      </div>
+    </div>
+
+    <!-- Multi-step Progress Bar -->
+    <div class="mt-8">
+      <div class="flex justify-between items-center text-xs font-medium text-brand-200 mb-2">
+        <span id="stepIndicatorLabel">ขั้นตอนที่ 1 จาก 5: ระดับชั้นและข้อมูลผู้สมัคร</span>
+        <span id="stepPercentage" class="font-bold text-amber-300">20%</span>
+      </div>
+      <div class="w-full bg-white/20 rounded-full h-2.5 overflow-hidden">
+        <div id="progressBar" class="bg-amber-400 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 20%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Body -->
+  <form id="quotaApplicationForm" onsubmit="handleFormSubmit(event)" class="p-6 md:p-8">
+    
+    <!-- Honeypot Field ป้องกันบอท (ซ่อนจากผู้ใช้จริง) -->
+    <div class="hidden" aria-hidden="true">
+      <input type="text" name="hp_email" id="hp_email" tabindex="-1" autocomplete="off">
+      <input type="text" name="website_url_honeypot" id="website_url_honeypot" tabindex="-1" autocomplete="off">
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- STEP 1: ระดับการศึกษาที่สมัคร และ ข้อมูลผู้สมัคร (ข้อ 1) -->
+    <!-- ============================================================== -->
+    <div id="step1" class="step-content space-y-6">
+      <div class="border-b border-gray-100 pb-3">
+        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="w-7 h-7 bg-brand-100 text-brand-700 rounded-full inline-flex items-center justify-center text-sm font-bold">1</span>
+          ระดับที่ต้องการสมัครและข้อมูลส่วนตัว
+        </h3>
+        <p class="text-xs text-gray-500 mt-1">กรุณาเลือกระดับที่ต้องการเข้าศึกษา และกรอกข้อมูลประจำตัวให้ถูกต้อง</p>
+      </div>
+
+      <!-- เลือกระดับที่สมัคร -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">ระดับชั้นที่ต้องการสมัคร <span class="text-red-500">*</span></label>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <label class="level-card cursor-pointer border-2 rounded-2xl p-4 flex items-center gap-3 transition hover:border-brand-500 bg-slate-50 border-slate-200">
+            <input type="radio" name="education_level" value="ปวช." class="w-4 h-4 text-brand-600 focus:ring-brand-500" checked onchange="handleLevelChange()">
+            <div>
+              <p class="font-bold text-gray-800 text-sm">ระดับ ปวช.</p>
+              <p class="text-xs text-gray-500">จบ ม.3 หรือเทียบเท่า</p>
+            </div>
+          </label>
+
+          <label class="level-card cursor-pointer border-2 rounded-2xl p-4 flex items-center gap-3 transition hover:border-brand-500 bg-slate-50 border-slate-200">
+            <input type="radio" name="education_level" value="ปวส. (สายตรง)" class="w-4 h-4 text-brand-600 focus:ring-brand-500" onchange="handleLevelChange()">
+            <div>
+              <p class="font-bold text-gray-800 text-sm">ปวส. (สายตรง)</p>
+              <p class="text-xs text-gray-500">จบ ปวช. ตรงสาขาวิชา</p>
+            </div>
+          </label>
+
+          <label class="level-card cursor-pointer border-2 rounded-2xl p-4 flex items-center gap-3 transition hover:border-brand-500 bg-slate-50 border-slate-200">
+            <input type="radio" name="education_level" value="ปวส. (ม.6/ปวช. ต่างสาขา)" class="w-4 h-4 text-brand-600 focus:ring-brand-500" onchange="handleLevelChange()">
+            <div>
+              <p class="font-bold text-gray-800 text-sm">ปวส. (ม.6/ต่างสาขา)</p>
+              <p class="text-xs text-gray-500">จบ ม.6 หรือ ปวช. ต่างสาขา</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- ข้อมูลผู้สมัคร (ข้อ 1) -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">คำนำหน้า <span class="text-red-500">*</span></label>
+          <select id="title" name="title" required class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm bg-white">
+            <option value="นาย">นาย</option>
+            <option value="นางสาว">นางสาว</option>
+            <option value="เด็กชาย">เด็กชาย</option>
+            <option value="เด็กหญิง">เด็กหญิง</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ <span class="text-red-500">*</span></label>
+          <input type="text" id="first_name" name="first_name" required placeholder="สมชาย" class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">นามสกุล <span class="text-red-500">*</span></label>
+          <input type="text" id="last_name" name="last_name" required placeholder="ใจดี" class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- เลขประจำตัวประชาชน 13 หลัก -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            เลขประจำตัวประชาชน (13 หลัก) <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="citizen_id" name="citizen_id" maxlength="13" required 
+                 oninput="handleCitizenIdInput(this)" placeholder="1100400123456" 
+                 class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm tracking-wider font-mono">
+          <p id="citizenIdMsg" class="text-xs mt-1 text-gray-500">ระบุตัวเลข 13 หลักตามบัตรประชาชน</p>
+        </div>
+
+        <!-- วันเดือนปีเกิด -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            วัน/เดือน/ปีเกิด (พ.ศ.) <span class="text-red-500">*</span>
+          </label>
+          <input type="date" id="birth_date_picker" required onchange="handleBirthDateChange(this)"
+                 class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm bg-white">
+          <input type="hidden" id="birth_date" name="birth_date">
+          <p id="birthDateThaiDisplay" class="text-xs mt-1 text-brand-600 font-medium"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- STEP 2: ข้อมูลครอบครัว (บิดา-มารดา) (ข้อ 2 และ 3) -->
+    <!-- ============================================================== -->
+    <div id="step2" class="step-content space-y-6 hidden">
+      <div class="border-b border-gray-100 pb-3">
+        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="w-7 h-7 bg-brand-100 text-brand-700 rounded-full inline-flex items-center justify-center text-sm font-bold">2</span>
+          ข้อมูลบิดาและมารดา
+        </h3>
+        <p class="text-xs text-gray-500 mt-1">กรุณากรอกข้อมูลบิดาและมารดาของผู้สมัคร</p>
+      </div>
+
+      <!-- ข้อ 2 บิดา -->
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+        <h4 class="font-bold text-sm text-gray-800 flex items-center gap-2">👨 ข้อ 2 ข้อมูลบิดา</h4>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-gray-600 mb-1">ชื่อ-สกุล บิดา <span class="text-red-500">*</span></label>
+            <input type="text" id="father_name" name="father_name" required placeholder="นายสมศักดิ์ ใจดี" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm bg-white">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">อายุ (ปี) <span class="text-red-500">*</span></label>
+            <input type="number" id="father_age" name="father_age" min="20" max="99" required placeholder="45" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm bg-white">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">อาชีพ <span class="text-red-500">*</span></label>
+            <input type="text" id="father_occupation" name="father_occupation" required placeholder="รับจ้าง / ค้าขาย / เกษตรกร" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm bg-white">
+          </div>
+        </div>
+      </div>
+
+      <!-- ข้อ 3 มารดา -->
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+        <h4 class="font-bold text-sm text-gray-800 flex items-center gap-2">👩 ข้อ 3 ข้อมูลมารดา</h4>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-gray-600 mb-1">ชื่อ-สกุล มารดา <span class="text-red-500">*</span></label>
+            <input type="text" id="mother_name" name="mother_name" required placeholder="นางสมศรี ใจดี" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm bg-white">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">อายุ (ปี) <span class="text-red-500">*</span></label>
+            <input type="number" id="mother_age" name="mother_age" min="20" max="99" required placeholder="43" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm bg-white">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">อาชีพ <span class="text-red-500">*</span></label>
+            <input type="text" id="mother_occupation" name="mother_occupation" required placeholder="รับจ้าง / ค้าขาย / ข้าราชการ" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm bg-white">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- STEP 3: ที่อยู่ปัจจุบัน และ สถานศึกษาเดิม (ข้อ 4 และ 5) -->
+    <!-- ============================================================== -->
+    <div id="step3" class="step-content space-y-6 hidden">
+      <div class="border-b border-gray-100 pb-3">
+        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="w-7 h-7 bg-brand-100 text-brand-700 rounded-full inline-flex items-center justify-center text-sm font-bold">3</span>
+          ที่อยู่ติดต่อได้และสถานศึกษาเดิม
+        </h3>
+        <p class="text-xs text-gray-500 mt-1">ที่อยู่ปัจจุบันที่สามารถติดต่อได้สะดวก และข้อมูลโรงเรียนที่กำลังศึกษา</p>
+      </div>
+
+      <!-- ข้อ 4 ที่อยู่ปัจจุบัน -->
+      <div class="space-y-4">
+        <h4 class="font-bold text-sm text-gray-800">🏡 ข้อ 4 ที่อยู่ปัจจุบันที่ติดต่อได้</h4>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">บ้านเลขที่ <span class="text-red-500">*</span></label>
+            <input type="text" id="address_no" name="address_no" required placeholder="99/1" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">หมู่ที่</label>
+            <input type="text" id="address_moo" name="address_moo" placeholder="3" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ซอย</label>
+            <input type="text" id="address_soi" name="address_soi" placeholder="-" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ถนน</label>
+            <input type="text" id="address_road" name="address_road" placeholder="-" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+        </div>
+
+        <!-- ค้นหาที่อยู่อัตโนมัติ (ตำบล/อำเภอ/จังหวัด/รหัสไปรษณีย์) -->
+        <div class="relative">
+          <label class="block text-xs font-medium text-brand-700 mb-1">
+            🔍 ค้นหา ตำบล / อำเภอ / รหัสไปรษณีย์ (ระบบจะเติมให้อัตโนมัติ):
+          </label>
+          <input type="text" id="addressSearchInput" placeholder="พิมพ์ชื่อตำบล หรือ อำเภอ หรือ รหัสไปรษณีย์ เช่น บ้านหมอ..." 
+                 oninput="handleAddressSearch(this.value)"
+                 class="w-full px-3 py-2.5 rounded-xl border-2 border-brand-200 focus:border-brand-500 text-sm bg-brand-50/50">
+          
+          <!-- Dropdown ผลการค้นหา -->
+          <div id="addressSearchResults" class="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg hidden max-h-48 overflow-y-auto"></div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ตำบล/แขวง <span class="text-red-500">*</span></label>
+            <input type="text" id="subdistrict" name="subdistrict" required placeholder="บ้านหมอ" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">อำเภอ/เขต <span class="text-red-500">*</span></label>
+            <input type="text" id="district" name="district" required placeholder="บ้านหมอ" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">จังหวัด <span class="text-red-500">*</span></label>
+            <input type="text" id="province" name="province" required placeholder="สระบุรี" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">รหัสไปรษณีย์ <span class="text-red-500">*</span></label>
+            <input type="text" id="zipcode" name="zipcode" maxlength="5" required placeholder="18130" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm font-mono">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">เบอร์โทรศัพท์ (10 หลัก ขึ้นต้นด้วย 0) <span class="text-red-500">*</span></label>
+            <input type="tel" id="phone" name="phone" maxlength="10" required placeholder="0812345678" 
+                   oninput="validatePhoneInput(this)" class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm font-mono">
+            <p id="phoneMsg" class="text-xs mt-1 text-gray-400"></p>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">อีเมล (สำหรับรับผลการสมัคร) <span class="text-red-500">*</span></label>
+            <input type="email" id="email" name="email" required placeholder="somchai@gmail.com" class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm">
+          </div>
+        </div>
+      </div>
+
+      <!-- ข้อ 5 สถานศึกษาเดิม -->
+      <div class="border-t border-gray-100 pt-4 space-y-3">
+        <h4 class="font-bold text-sm text-gray-800">🏫 ข้อ 5 สถานศึกษาปัจจุบัน</h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ระดับชั้นที่กำลังศึกษา <span class="text-red-500">*</span></label>
+            <select id="current_school_level" name="current_school_level" required class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm bg-white">
+              <option value="มัธยมศึกษาปีที่ 3">มัธยมศึกษาปีที่ 3 (ม.3)</option>
+              <option value="มัธยมศึกษาปีที่ 6">มัธยมศึกษาปีที่ 6 (ม.6)</option>
+              <option value="ประกาศนียบัตรวิชาชีพ (ปวช.3)">ประกาศนียบัตรวิชาชีพ (ปวช.3)</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-gray-600 mb-1">ชื่อโรงเรียนเดิม <span class="text-red-500">*</span></label>
+            <input type="text" id="current_school_name" name="current_school_name" required placeholder="โรงเรียนท่าหลวงวิทยานุกูล" class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">เลขที่ตั้ง รร.</label>
+            <input type="text" id="school_address_no" name="school_address_no" placeholder="12" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ตำบล รร.</label>
+            <input type="text" id="school_subdistrict" name="school_subdistrict" placeholder="ท่าลาน" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">อำเภอ รร.</label>
+            <input type="text" id="school_district" name="school_district" placeholder="บ้านหมอ" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">จังหวัด รร. <span class="text-red-500">*</span></label>
+            <input type="text" id="school_province" name="school_province" required placeholder="สระบุรี" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">เกรดเฉลี่ยสะสม (GPAX 0.00 - 4.00) <span class="text-red-500">*</span></label>
+            <input type="number" step="0.01" min="0.00" max="4.00" id="gpax" name="gpax" required placeholder="3.50" 
+                   class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm font-mono">
+            <p class="text-xs text-gray-400 mt-1">ใช้ผลการเรียน 5 ภาคเรียน ทศนิยม 2 ตำแหน่ง</p>
+          </div>
+          <div id="prevMajorContainer" class="hidden">
+            <label class="block text-xs font-medium text-gray-600 mb-1">สาขาวิชาเดิมที่จบ ปวช. (สำหรับผู้สมัคร ปวส.) <span class="text-red-500">*</span></label>
+            <input type="text" id="prev_major" name="prev_major" placeholder="เช่น ช่างยนต์, ช่างไฟฟ้ากำลัง" class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- STEP 4: สาขาวิชาที่ต้องการสมัคร และ ช่องทางที่รู้จัก (ข้อ 6) -->
+    <!-- ============================================================== -->
+    <div id="step4" class="step-content space-y-6 hidden">
+      <div class="border-b border-gray-100 pb-3">
+        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="w-7 h-7 bg-brand-100 text-brand-700 rounded-full inline-flex items-center justify-center text-sm font-bold">4</span>
+          สาขาวิชาที่ต้องการสมัคร
+        </h3>
+        <p class="text-xs text-gray-500 mt-1">เลือกลำดับสาขาวิชาตามความสนใจ (รายการอ่านจากระบบ Config)</p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- สาขาอันดับ 1 -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">
+            สาขาวิชาที่ต้องการสมัคร (อันดับ 1) <span class="text-red-500">*</span>
+          </label>
+          <select id="quota_major_1" name="quota_major_1" required onchange="handleMajorChange()"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-500 text-sm bg-white font-medium">
+            <option value="">-- กรุณาเลือกสาขาวิชาอันดับ 1 --</option>
+          </select>
+        </div>
+
+        <!-- สาขาอันดับ 2 (เฉพาะ ปวช.) -->
+        <div id="major2Container">
+          <label class="block text-sm font-semibold text-gray-700 mb-1">
+            สาขาวิชาที่ต้องการสมัคร (อันดับ 2) <span class="text-red-500">* (เฉพาะ ปวช. ห้ามซ้ำกับอันดับ 1)</span>
+          </label>
+          <select id="quota_major_2" name="quota_major_2"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-500 text-sm bg-white font-medium">
+            <option value="">-- กรุณาเลือกสาขาวิชาอันดับ 2 --</option>
+          </select>
+        </div>
+
+        <!-- ช่องทางที่รู้จักวิทยาลัย -->
+        <div class="pt-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            ช่องทางที่ท่านทราบข่าวการรับสมัคร <span class="text-red-500">*</span>
+          </label>
+          <select id="referral_source" name="referral_source" required class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm bg-white">
+            <option value="ครูแนะแนวมาประชาสัมพันธ์ที่โรงเรียน">ครูแนะแนวมาประชาสัมพันธ์ที่โรงเรียน</option>
+            <option value="เพื่อน / รุ่นพี่ แนะนำ">เพื่อน / รุ่นพี่ แนะนำ</option>
+            <option value="Facebook / สื่อโซเชียลมีเดียของวิทยาลัย">Facebook / สื่อโซเชียลมีเดียของวิทยาลัย</option>
+            <option value="ผู้ปกครอง / ญาติ แนะนำ">ผู้ปกครอง / ญาติ แนะนำ</option>
+            <option value="เว็บไซต์วิทยาลัย">เว็บไซต์วิทยาลัย</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- STEP 5: อัปโหลดเอกสารหลักฐาน และ ยินยอม PDPA -->
+    <!-- ============================================================== -->
+    <div id="step5" class="step-content space-y-6 hidden">
+      <div class="border-b border-gray-100 pb-3">
+        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <span class="w-7 h-7 bg-brand-100 text-brand-700 rounded-full inline-flex items-center justify-center text-sm font-bold">5</span>
+          แนบเอกสารหลักฐาน และ ยืนยันข้อมูล
+        </h3>
+        <p class="text-xs text-gray-500 mt-1">ไฟล์ JPG, PNG หรือ PDF ขนาดไม่เกิน 5 MB ต่อไฟล์ (จัดเก็บใน Drive ส่วนตัว ปลอดภัยตาม PDPA)</p>
+      </div>
+
+      <!-- รายการอัปโหลดไฟล์ -->
+      <div class="space-y-4">
+        <!-- 1. รูปถ่าย 1 นิ้ว -->
+        <div class="p-4 border rounded-2xl bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <p class="font-bold text-sm text-gray-800">1. รูปถ่ายหน้าตรง ขนาด 1 นิ้ว <span class="text-red-500">*</span></p>
+            <p class="text-xs text-gray-500">หน้าตรง ไม่สวมหมวก ไม่ใส่แว่นตาดำ ถ่ายไว้ไม่เกิน 6 เดือน</p>
+            <span id="photoFileName" class="text-xs font-semibold text-brand-600 mt-1 block"></span>
+          </div>
+          <div>
+            <input type="file" id="file_photo_input" accept="image/jpeg,image/png" required class="hidden" onchange="handleFileSelection(this, 'photo')">
+            <button type="button" onclick="document.getElementById('file_photo_input').click()" 
+                    class="px-4 py-2 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-100 shadow-sm transition">
+              📁 เลือกรูปถ่าย (JPG/PNG)
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. ปพ.1 เกรด 5 เทอม -->
+        <div class="p-4 border rounded-2xl bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <p class="font-bold text-sm text-gray-800">2. เอกสารแสดงผลการเรียน 5 ภาคเรียน (ปพ.1) <span class="text-red-500">*</span></p>
+            <p class="text-xs text-gray-500">เอกสาร ปพ.1 หรือหนังสือรับรองผลการเรียนเฉลี่ยสะสม 5 ภาคเรียน</p>
+            <span id="transcriptFileName" class="text-xs font-semibold text-brand-600 mt-1 block"></span>
+          </div>
+          <div>
+            <input type="file" id="file_transcript_input" accept="image/jpeg,image/png,application/pdf" required class="hidden" onchange="handleFileSelection(this, 'transcript')">
+            <button type="button" onclick="document.getElementById('file_transcript_input').click()" 
+                    class="px-4 py-2 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-100 shadow-sm transition">
+              📁 เลือกไฟล์ ปพ.1 (PDF/ภาพ)
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. สำเนาบัตร ปชช. / ทะเบียนบ้าน -->
+        <div class="p-4 border rounded-2xl bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <p class="font-bold text-sm text-gray-800">3. สำเนาบัตรประชาชน หรือ สำเนาทะเบียนบ้าน <span class="text-red-500">*</span></p>
+            <p class="text-xs text-gray-500">เอกสารพร้อมลงนามรับรองสำเนาถูกต้อง</p>
+            <span id="idCardFileName" class="text-xs font-semibold text-brand-600 mt-1 block"></span>
+          </div>
+          <div>
+            <input type="file" id="file_id_card_input" accept="image/jpeg,image/png,application/pdf" required class="hidden" onchange="handleFileSelection(this, 'idCard')">
+            <button type="button" onclick="document.getElementById('file_id_card_input').click()" 
+                    class="px-4 py-2 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-100 shadow-sm transition">
+              📁 เลือกสำเนาบัตร (PDF/ภาพ)
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. เกียรติบัตร (ไม่บังคับ) -->
+        <div class="p-4 border rounded-2xl bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <p class="font-bold text-sm text-gray-800">4. สำเนาเกียรติบัตร / รางวัลความสามารถพิเศษ (ถ้ามี)</p>
+            <p class="text-xs text-gray-500">เกียรติบัตรด้านวิชาการ กีฬา ศิลปะ หรือจิตอาสา</p>
+            <span id="certFileName" class="text-xs font-semibold text-brand-600 mt-1 block"></span>
+          </div>
+          <div>
+            <input type="file" id="file_cert_input" accept="image/jpeg,image/png,application/pdf" class="hidden" onchange="handleFileSelection(this, 'cert')">
+            <button type="button" onclick="document.getElementById('file_cert_input').click()" 
+                    class="px-4 py-2 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-100 shadow-sm transition">
+              📁 แนบเกียรติบัตร (ถ้ามี)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ส่วนยินยอม PDPA และ ลายมือชื่อ -->
+      <div class="mt-6 p-5 bg-amber-50 rounded-2xl border border-amber-200 space-y-4">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="pdpa_consent" name="pdpa_consent" required class="w-5 h-5 text-brand-600 rounded border-gray-300 mt-0.5 focus:ring-brand-500">
+          <span class="text-xs md:text-sm text-gray-800 leading-snug">
+            ข้าพเจ้ายินยอมให้วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์ จัดเก็บและใช้ข้อมูลส่วนบุคคลตาม 
+            <button type="button" onclick="openPdpaModal()" class="text-brand-600 underline font-bold hover:text-brand-800">
+              พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA)
+            </button> 
+            เพื่อประโยชน์ในการรับสมัครและคัดเลือกเข้าศึกษาต่อ <span class="text-red-500">*</span>
+          </span>
+        </label>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">
+            ลงชื่อผู้สมัคร (พิมพ์ชื่อ-นามสกุล แทนลายมือชื่อยืนยันความถูกต้อง) <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="applicant_signature_text" name="applicant_signature_text" required placeholder="นายสมชาย ใจดี" 
+                 class="w-full px-3 py-2.5 rounded-xl border border-amber-300 bg-white text-sm font-medium">
+        </div>
+      </div>
+    </div>
+
+    <!-- ปุ่มควบคุม Next / Back / Submit -->
+    <div class="mt-8 pt-4 border-t border-gray-100 flex items-center justify-between">
+      <button type="button" id="prevBtn" onclick="navigateStep(-1)" 
+              class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition hidden">
+        ← ย้อนกลับ
+      </button>
+      <div class="flex-1"></div>
+      <button type="button" id="nextBtn" onclick="navigateStep(1)" 
+              class="px-6 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-brand-700 transition flex items-center gap-2">
+        ถัดไป →
+      </button>
+      <button type="submit" id="submitBtn" 
+              class="px-8 py-3 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg hover:bg-emerald-700 transition hidden flex items-center gap-2">
+        <span>🚀 ยืนยันการส่งใบสมัคร</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- ============================================================== -->
+<!-- หน้าจอสำเร็จหลังส่งใบสมัคร (Success Screen) -->
+<!-- ============================================================== -->
+<div id="successScreen" class="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-emerald-100 p-8 text-center hidden">
+  <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 animate-bounce">
+    ✓
+  </div>
+  <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+    ส่งใบสมัครสำเร็จ
+  </span>
+  <h3 class="text-2xl font-bold text-gray-900">ยื่นใบสมัครเรียบร้อยแล้ว!</h3>
+  <p class="text-gray-600 text-sm mt-1">ระบบได้บันทึกข้อมูลและออกเลขที่ใบสมัครของท่านแล้ว</p>
+
+  <div class="my-6 p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 max-w-sm mx-auto">
+    <p class="text-xs text-gray-500 uppercase tracking-widest font-bold">เลขที่ใบสมัครของคุณ</p>
+    <p id="resultAppNo" class="text-3xl font-black text-brand-700 tracking-wider font-mono my-1">-</p>
+    <p class="text-xs text-gray-500">กรุณาบันทึกหรือแคปเจอร์หน้าจอนี้ไว้เป็นหลักฐาน</p>
+  </div>
+
+  <div class="flex flex-col sm:flex-row justify-center gap-3 mt-6">
+    <button type="button" id="downloadPdfBtn" onclick="downloadApplicationPdf()" 
+            class="px-6 py-3 bg-brand-600 text-white font-bold rounded-xl shadow-md hover:bg-brand-700 transition flex items-center justify-center gap-2 text-sm">
+      📄 ดาวน์โหลดใบสมัคร (PDF)
+    </button>
+    <button type="button" onclick="switchToTab('status')" 
+            class="px-6 py-3 bg-slate-100 text-gray-700 font-bold rounded-xl hover:bg-slate-200 transition text-sm">
+      🔍 ตรวจสอบสถานะใบสมัคร
+    </button>
+  </div>
+</div>
+
+<script>
+// ตัวแปรสำหรับ Multi-step Form
+let currentStep = 1;
+const totalSteps = 5;
+const uploadedFiles = {
+  photo: null,
+  transcript: null,
+  idCard: null,
+  cert: null
+};
+let createdPdfDriveId = '';
+
+/**
+ * สลับระดับการศึกษา (ปวช. หรือ ปวส.)
+ */
+function handleLevelChange() {
+  const selectedLevel = document.querySelector('input[name="education_level"]:checked').value;
+  const isPvoc = selectedLevel === 'ปวช.';
+  const prevMajorContainer = document.getElementById('prevMajorContainer');
+  const major2Container = document.getElementById('major2Container');
+
+  // ถ้าเป็น ปวส. ให้แสดงช่องสาขาเดิม
+  if (isPvoc) {
+    prevMajorContainer.classList.add('hidden');
+    major2Container.classList.remove('hidden');
+  } else {
+    prevMajorContainer.classList.remove('hidden');
+    major2Container.classList.add('hidden');
+  }
+
+  // โหลดสาขาวิชาใหม่ให้ตรงกับระดับ
+  filterMajorsByLevel(selectedLevel);
+}
+
+/**
+ * โหลดรายชื่อสาขาวิชาจาก Server และแสดงใน Dropdown
+ */
+let allMajorsData = [];
+function loadMajors() {
+  google.script.run
+    .withSuccessHandler(function(majors) {
+      allMajorsData = majors;
+      const initialLevel = document.querySelector('input[name="education_level"]:checked') ? 
+                            document.querySelector('input[name="education_level"]:checked').value : 'ปวช.';
+      filterMajorsByLevel(initialLevel);
+    })
+    .apiGetMajors();
+}
+
+function filterMajorsByLevel(level) {
+  const major1Select = document.getElementById('quota_major_1');
+  const major2Select = document.getElementById('quota_major_2');
+
+  const filtered = allMajorsData.filter(m => m.level === level);
+
+  let options1 = '<option value="">-- กรุณาเลือกสาขาวิชาอันดับ 1 --</option>';
+  let options2 = '<option value="">-- กรุณาเลือกสาขาวิชาอันดับ 2 --</option>';
+
+  filtered.forEach(m => {
+    options1 += `<option value="${m.major_name}">${m.major_name} (${m.major_code})</option>`;
+    options2 += `<option value="${m.major_name}">${m.major_name} (${m.major_code})</option>`;
+  });
+
+  major1Select.innerHTML = options1;
+  major2Select.innerHTML = options2;
+}
+
+function handleMajorChange() {
+  const m1 = document.getElementById('quota_major_1').value;
+  const m2Select = document.getElementById('quota_major_2');
+  
+  // ป้องกันการเลือกสาขาซ้ำ
+  Array.from(m2Select.options).forEach(opt => {
+    if (opt.value && opt.value === m1) {
+      opt.disabled = true;
+    } else {
+      opt.disabled = false;
+    }
+  });
+}
+
+/**
+ * ตรวจสอบเลขประจำตัวประชาชน 13 หลักแบบ Realtime
+ */
+function handleCitizenIdInput(input) {
+  const val = input.value.replace(/[^0-9]/g, '');
+  input.value = val;
+  const msg = document.getElementById('citizenIdMsg');
+
+  if (val.length < 13) {
+    msg.textContent = `กรอกแล้ว ${val.length}/13 หลัก`;
+    msg.className = 'text-xs mt-1 text-gray-500';
+    return;
+  }
+
+  // อัลกอริทึม Checksum บัตรประชาชนไทย
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += parseInt(val.charAt(i), 10) * (13 - i);
+  }
+  const checkDigit = (11 - (sum % 11)) % 10;
+  const isValid = checkDigit === parseInt(val.charAt(12), 10);
+
+  if (isValid) {
+    msg.textContent = '✓ เลขประจำตัวประชาชนถูกต้อง';
+    msg.className = 'text-xs mt-1 text-emerald-600 font-bold';
+  } else {
+    msg.textContent = '✕ เลขประจำตัวประชาชนไม่ถูกต้องตามสูตร มท.';
+    msg.className = 'text-xs mt-1 text-red-600 font-bold';
+  }
+}
+
+/**
+ * แปลงวันเกิดเป็น พ.ศ. แสดงผลทันที
+ */
+function handleBirthDateChange(input) {
+  const val = input.value; // YYYY-MM-DD
+  if (!val) return;
+  const parts = val.split('-');
+  const bYear = parseInt(parts[0], 10) + 543;
+  const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const monthName = thaiMonths[parseInt(parts[1], 10) - 1];
+  const day = parseInt(parts[2], 10);
+
+  const thaiFormatted = `${day} ${monthName} ${bYear}`;
+  document.getElementById('birthDateThaiDisplay').textContent = `วันเกิด (พ.ศ.): ${thaiFormatted}`;
+  // เก็บรูปแบบ พ.ศ. ลง hidden input
+  document.getElementById('birth_date').value = `${bYear}-${parts[1]}-${parts[2]}`;
+}
+
+/**
+ * ตรวจสอบเบอร์โทร 10 หลัก
+ */
+function validatePhoneInput(input) {
+  const val = input.value.replace(/[^0-9]/g, '');
+  input.value = val;
+  const msg = document.getElementById('phoneMsg');
+  if (val.length === 10 && val.startsWith('0')) {
+    msg.textContent = '✓ เบอร์โทรถูกต้อง';
+    msg.className = 'text-xs mt-1 text-emerald-600 font-bold';
+  } else {
+    msg.textContent = 'ระบุเบอร์โทร 10 หลักขึ้นต้นด้วย 0';
+    msg.className = 'text-xs mt-1 text-gray-400';
+  }
+}
+
+/**
+ * ค้นหาและเติมที่อยู่ไทยอัตโนมัติ
+ */
+function handleAddressSearch(val) {
+  const container = document.getElementById('addressSearchResults');
+  if (!val || val.trim().length < 2) {
+    container.classList.add('hidden');
+    return;
+  }
+
+  const results = searchThaiAddress(val);
+  if (results.length === 0) {
+    container.innerHTML = '<div class="p-3 text-xs text-gray-500">ไม่พบข้อมูลที่ตรงกัน (ท่านสามารถกรอกข้อมูลเองด้านล่างได้)</div>';
+    container.classList.remove('hidden');
+    return;
+  }
+
+  let html = '';
+  results.forEach(item => {
+    html += `
+      <div onclick="selectAddress('${item.s}', '${item.d}', '${item.p}', '${item.z}')" 
+           class="p-2.5 hover:bg-brand-50 cursor-pointer border-b border-gray-100 text-xs text-gray-700 flex justify-between">
+        <span>ต.${item.s} > อ.${item.d} > จ.${item.p}</span>
+        <span class="font-bold text-brand-700">${item.z}</span>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+  container.classList.remove('hidden');
+}
+
+function selectAddress(subdistrict, district, province, zipcode) {
+  document.getElementById('subdistrict').value = subdistrict;
+  document.getElementById('district').value = district;
+  document.getElementById('province').value = province;
+  document.getElementById('zipcode').value = zipcode;
+  document.getElementById('addressSearchResults').classList.add('hidden');
+  document.getElementById('addressSearchInput').value = `${subdistrict} > ${district} > ${province} ${zipcode}`;
+}
+
+/**
+ * จัดการการเลือกไฟล์และแปลงเป็น Base64
+ */
+function handleFileSelection(input, fileKey) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // ตรวจสอบขนาดไม่เกิน 5MB
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('ขนาดไฟล์เกิน 5 MB กรุณาเลือกไฟล์ใหม่', 'error');
+    input.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64Data = e.target.result.split(',')[1];
+    uploadedFiles[fileKey] = {
+      name: file.name,
+      mimeType: file.type,
+      size: file.size,
+      base64: base64Data
+    };
+
+    // แสดงชื่อไฟล์ที่เลือก
+    const labels = {
+      photo: 'photoFileName',
+      transcript: 'transcriptFileName',
+      idCard: 'idCardFileName',
+      cert: 'certFileName'
+    };
+    const targetLabel = document.getElementById(labels[fileKey]);
+    if (targetLabel) {
+      targetLabel.textContent = `✓ ${file.name} (${(file.size / (1024*1024)).toFixed(2)} MB)`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+/**
+ * สลับขั้นตอนใน Multi-step Form
+ */
+function navigateStep(direction) {
+  // ตรวจสอบความถูกต้องของ Step ปัจจุบันก่อนไปต่อ
+  if (direction > 0 && !validateCurrentStep(currentStep)) {
+    return;
+  }
+
+  const newStep = currentStep + direction;
+  if (newStep < 1 || newStep > totalSteps) return;
+
+  // ซ่อน step เดิม
+  document.getElementById(`step${currentStep}`).classList.add('hidden');
+  // แสดง step ใหม่
+  document.getElementById(`step${newStep}`).classList.remove('hidden');
+
+  currentStep = newStep;
+
+  // อัปเดต Progress Bar
+  const percentage = (currentStep / totalSteps) * 100;
+  document.getElementById('progressBar').style.width = `${percentage}%`;
+  document.getElementById('stepPercentage').textContent = `${Math.round(percentage)}%`;
+
+  const stepLabels = [
+    'ขั้นตอนที่ 1 จาก 5: ระดับชั้นและข้อมูลผู้สมัคร',
+    'ขั้นตอนที่ 2 จาก 5: ข้อมูลบิดาและมารดา',
+    'ขั้นตอนที่ 3 จาก 5: ที่อยู่และสถานศึกษาเดิม',
+    'ขั้นตอนที่ 4 จาก 5: สาขาวิชาที่ต้องการสมัคร',
+    'ขั้นตอนที่ 5 จาก 5: แนบเอกสารหลักฐานและยืนยัน'
+  ];
+  document.getElementById('stepIndicatorLabel').textContent = stepLabels[currentStep - 1];
+
+  // ควบคุมปุ่มแสดงผล
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const submitBtn = document.getElementById('submitBtn');
+
+  if (currentStep === 1) {
+    prevBtn.classList.add('hidden');
+  } else {
+    prevBtn.classList.remove('hidden');
+  }
+
+  if (currentStep === totalSteps) {
+    nextBtn.classList.add('hidden');
+    submitBtn.classList.remove('hidden');
+  } else {
+    nextBtn.classList.remove('hidden');
+    submitBtn.classList.add('hidden');
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/**
+ * ตรวจสอบความถูกต้องในแต่ละ Step
+ */
+function validateCurrentStep(step) {
+  if (step === 1) {
+    const fn = document.getElementById('first_name').value.trim();
+    const ln = document.getElementById('last_name').value.trim();
+    const cid = document.getElementById('citizen_id').value.trim();
+    const bdate = document.getElementById('birth_date').value;
+
+    if (!fn || !ln) {
+      showToast('กรุณาระบุชื่อและนามสกุล', 'error');
+      return false;
+    }
+    if (cid.length !== 13) {
+      showToast('กรุณาระบุเลขบัตรประชาชนให้ครบ 13 หลัก', 'error');
+      return false;
+    }
+    if (!bdate) {
+      showToast('กรุณาระบุวัน/เดือน/ปีเกิด', 'error');
+      return false;
+    }
+  } else if (step === 2) {
+    const fName = document.getElementById('father_name').value.trim();
+    const mName = document.getElementById('mother_name').value.trim();
+    if (!fName || !mName) {
+      showToast('กรุณาระบุข้อมูลบิดาและมารดาให้ครบถ้วน', 'error');
+      return false;
+    }
+  } else if (step === 3) {
+    const addr = document.getElementById('address_no').value.trim();
+    const sub = document.getElementById('subdistrict').value.trim();
+    const dis = document.getElementById('district').value.trim();
+    const pro = document.getElementById('province').value.trim();
+    const zip = document.getElementById('zipcode').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const school = document.getElementById('current_school_name').value.trim();
+    const gpax = parseFloat(document.getElementById('gpax').value);
+
+    if (!addr || !sub || !dis || !pro || !zip) {
+      showToast('กรุณาระบุที่อยู่ให้ครบถ้วน', 'error');
+      return false;
+    }
+    if (phone.length !== 10 || !phone.startsWith('0')) {
+      showToast('กรุณาระบุเบอร์โทรศัพท์ 10 หลักขึ้นต้นด้วย 0', 'error');
+      return false;
+    }
+    if (!email || !email.includes('@')) {
+      showToast('กรุณาระบุอีเมลที่ถูกต้อง', 'error');
+      return false;
+    }
+    if (!school) {
+      showToast('กรุณาระบุชื่อโรงเรียนเดิม', 'error');
+      return false;
+    }
+    if (isNaN(gpax) || gpax < 0.00 || gpax > 4.00) {
+      showToast('กรุณาระบุเกรดเฉลี่ย (GPAX) ระหว่าง 0.00 - 4.00', 'error');
+      return false;
+    }
+  } else if (step === 4) {
+    const m1 = document.getElementById('quota_major_1').value;
+    const level = document.querySelector('input[name="education_level"]:checked').value;
+    if (!m1) {
+      showToast('กรุณาเลือกสาขาวิชาอันดับ 1', 'error');
+      return false;
+    }
+    if (level === 'ปวช.') {
+      const m2 = document.getElementById('quota_major_2').value;
+      if (!m2) {
+        showToast('กรุณาเลือกสาขาวิชาอันดับ 2 สำหรับระดับ ปวช.', 'error');
+        return false;
+      }
+      if (m1 === m2) {
+        showToast('สาขาวิชาอันดับ 1 และอันดับ 2 ห้ามซ้ำกัน', 'error');
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+/**
+ * ส่งฟอร์มใบสมัคร
+ */
+function handleFormSubmit(e) {
+  e.preventDefault();
+
+  // ตรวจสอบเอกสารบังคับ
+  if (!uploadedFiles.photo || !uploadedFiles.transcript || !uploadedFiles.idCard) {
+    showToast('กรุณาแนบเอกสารบังคับให้ครบทั้ง 3 รายการ', 'error');
+    return;
+  }
+
+  // ตรวจสอบ PDPA
+  const pdpa = document.getElementById('pdpa_consent').checked;
+  if (!pdpa) {
+    showToast('กรุณาติ๊กยินยอมนโยบาย PDPA ก่อนส่งใบสมัคร', 'error');
+    return;
+  }
+
+  const sign = document.getElementById('applicant_signature_text').value.trim();
+  if (!sign) {
+    showToast('กรุณาพิมพ์ชื่อ-สกุลเพื่อลงนามรับรอง', 'error');
+    return;
+  }
+
+  showLoading('กำลังบันทึกข้อมูลและสร้างใบสมัคร PDF กรุณารอสักครู่...');
+
+  // รวบรวมข้อมูลทั้งหมด
+  const formPayload = {
+    hp_email: document.getElementById('hp_email').value,
+    website_url_honeypot: document.getElementById('website_url_honeypot').value,
+    education_level: document.querySelector('input[name="education_level"]:checked').value,
+    title: document.getElementById('title').value,
+    first_name: document.getElementById('first_name').value.trim(),
+    last_name: document.getElementById('last_name').value.trim(),
+    citizen_id: document.getElementById('citizen_id').value.trim(),
+    birth_date: document.getElementById('birth_date').value,
+    father_name: document.getElementById('father_name').value.trim(),
+    father_age: document.getElementById('father_age').value,
+    father_occupation: document.getElementById('father_occupation').value.trim(),
+    mother_name: document.getElementById('mother_name').value.trim(),
+    mother_age: document.getElementById('mother_age').value,
+    mother_occupation: document.getElementById('mother_occupation').value.trim(),
+    address_no: document.getElementById('address_no').value.trim(),
+    address_moo: document.getElementById('address_moo').value.trim(),
+    address_soi: document.getElementById('address_soi').value.trim(),
+    address_road: document.getElementById('address_road').value.trim(),
+    subdistrict: document.getElementById('subdistrict').value.trim(),
+    district: document.getElementById('district').value.trim(),
+    province: document.getElementById('province').value.trim(),
+    zipcode: document.getElementById('zipcode').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    current_school_level: document.getElementById('current_school_level').value,
+    current_school_name: document.getElementById('current_school_name').value.trim(),
+    school_address_no: document.getElementById('school_address_no').value.trim(),
+    school_subdistrict: document.getElementById('school_subdistrict').value.trim(),
+    school_district: document.getElementById('school_district').value.trim(),
+    school_province: document.getElementById('school_province').value.trim(),
+    gpax: document.getElementById('gpax').value,
+    prev_major: document.getElementById('prev_major').value.trim(),
+    quota_major_1: document.getElementById('quota_major_1').value,
+    quota_major_2: document.getElementById('quota_major_2').value,
+    referral_source: document.getElementById('referral_source').value,
+    pdpa_consent: pdpa,
+    applicant_signature_text: sign,
+    file_photo: uploadedFiles.photo,
+    file_transcript: uploadedFiles.transcript,
+    file_id_card: uploadedFiles.idCard,
+    file_certificate: uploadedFiles.cert
+  };
+
+  google.script.run
+    .withSuccessHandler(function(response) {
+      hideLoading();
+      if (response.success) {
+        createdPdfDriveId = response.pdfId;
+        document.getElementById('formSection').classList.add('hidden');
+        document.getElementById('resultAppNo').textContent = response.applicationNo;
+        document.getElementById('successScreen').classList.remove('hidden');
+        showToast('ยื่นใบสมัครสำเร็จเรียบร้อยแล้ว!', 'success');
+      } else {
+        showToast(response.message || 'ไม่สามารถส่งใบสมัครได้', 'error');
+      }
+    })
+    .withFailureHandler(function(error) {
+      hideLoading();
+      showToast('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์: ' + error.message, 'error');
+    })
+    .apiSubmitApplication(formPayload);
+}
+
+/**
+ * ดาวน์โหลดใบสมัคร PDF
+ */
+function downloadApplicationPdf() {
+  if (!createdPdfDriveId) {
+    showToast('ไม่พบไฟล์ PDF กรุณาเข้าสู่เมนู "ตรวจสอบสถานะ" เพื่อดาวน์โหลด', 'warning');
+    return;
+  }
+  const url = `<?= ScriptApp.getService().getUrl() ?>?action=download_pdf&id=${createdPdfDriveId}`;
+  window.open(url, '_blank');
+}
+</script>
+
+<!-- END applicant_form -->
+
+    </section>
+
+    <!-- แท็บที่ 2: ตรวจสอบสถานะและแก้ไขเอกสาร (Phase 1) -->
+    <section id="tab-status-content" class="tab-view hidden">
+      
+<!-- BEGIN applicant_status -->
+<!-- หน้าตรวจสอบสถานะใบสมัคร และส่งเอกสารแก้ไข (Phase 1) -->
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <!-- Search Card -->
+  <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 p-6 md:p-8">
+    <div class="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
+      <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-2xl flex items-center justify-center text-2xl font-bold">
+        🔍
+      </div>
+      <div>
+        <h3 class="text-xl font-bold text-gray-900">ตรวจสอบสถานะการสมัคร</h3>
+        <p class="text-xs text-gray-500">ค้นหาด้วยเลขประจำตัวประชาชน 13 หลัก และวันเดือนปีเกิด (พ.ศ.)</p>
+      </div>
+    </div>
+
+    <form onsubmit="handleCheckStatus(event)" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">
+            เลขประจำตัวประชาชน 13 หลัก <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="status_citizen_id" maxlength="13" required placeholder="1100400123456" 
+                 class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-500 text-sm font-mono tracking-wider">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">
+            วัน/เดือน/ปีเกิด (พ.ศ.) <span class="text-red-500">*</span>
+          </label>
+          <input type="date" id="status_birth_date_picker" required onchange="handleStatusBirthChange(this)"
+                 class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-500 text-sm bg-white">
+          <input type="hidden" id="status_birth_date">
+          <p id="statusBirthThaiDisplay" class="text-xs mt-1 text-brand-600 font-medium"></p>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm shadow-md transition flex items-center gap-2">
+          <span>ตรวจสอบผล</span> →
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Status Result Details (แสดงเมื่อค้นหาสำเร็จ) -->
+  <div id="statusResultCard" class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 p-6 md:p-8 hidden space-y-6">
+    
+    <!-- Status Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-gray-100 gap-3">
+      <div>
+        <span class="text-xs text-gray-400 font-mono">เลขที่ใบสมัคร</span>
+        <h4 id="resAppNo" class="text-2xl font-black text-brand-700 font-mono tracking-wider">-</h4>
+        <p id="resFullName" class="text-base font-bold text-gray-800 mt-0.5">-</p>
+      </div>
+      <div>
+        <span id="resStatusBadge" class="inline-block px-4 py-2 rounded-2xl text-sm font-bold shadow-sm">-</span>
+      </div>
+    </div>
+
+    <!-- General Info Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-2xl text-xs">
+      <div>
+        <span class="text-gray-400">ระดับที่สมัคร:</span>
+        <p id="resLevel" class="font-bold text-gray-800 mt-0.5">-</p>
+      </div>
+      <div>
+        <span class="text-gray-400">สาขาวิชาอันดับ 1:</span>
+        <p id="resMajor1" class="font-bold text-gray-800 mt-0.5">-</p>
+      </div>
+      <div>
+        <span class="text-gray-400">เลขบัตรประชาชน:</span>
+        <p id="resCitizenId" class="font-mono font-bold text-gray-800 mt-0.5">-</p>
+      </div>
+      <div>
+        <span class="text-gray-400">วันที่ยื่นใบสมัคร:</span>
+        <p id="resApplyDate" class="font-bold text-gray-800 mt-0.5">-</p>
+      </div>
+    </div>
+
+    <!-- Officer Remarks (ถ้ามีข้อความแจ้งเตือน) -->
+    <div id="officerRemarksBox" class="p-4 rounded-2xl border-l-4 bg-amber-50 border-amber-500 hidden">
+      <h5 class="font-bold text-sm text-amber-800">📌 หมายเหตุจากเจ้าหน้าที่:</h5>
+      <p id="resRemarksText" class="text-xs md:text-sm text-amber-900 mt-1"></p>
+    </div>
+
+    <!-- เอกสารประกอบการสมัครและสถานะการตรวจสอบ -->
+    <div>
+      <h5 class="font-bold text-sm text-gray-800 mb-3 flex items-center justify-between">
+        <span>📑 รายการเอกสารหลักฐาน</span>
+        <span class="text-xs text-gray-400 font-normal">สถานะการตรวจสอบรายชิ้น</span>
+      </h5>
+
+      <div id="docsListContainer" class="space-y-3">
+        <!-- Render เอกสารไดนามิก -->
+      </div>
+    </div>
+
+    <!-- Download PDF Button -->
+    <div class="pt-4 border-t border-gray-100 flex flex-wrap gap-3 justify-between items-center">
+      <button type="button" id="btnDownloadApplicantPdf" onclick="downloadPdfFromStatus()" 
+              class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow transition flex items-center gap-2">
+        📄 ดาวน์โหลดใบสมัคร (PDF)
+      </button>
+
+      <span class="text-xs text-gray-400">ระบบตรวจสอบสถานะอัตโนมัติ 24 ชม.</span>
+    </div>
+  </div>
+
+  <!-- Re-upload Modal สำหรับส่งเอกสารแก้ไข -->
+  <div id="reuploadModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+        <h4 class="font-bold text-gray-900 text-base">📤 อัปโหลดเอกสารฉบับแก้ไข</h4>
+        <button type="button" onclick="closeReuploadModal()" class="text-gray-400 text-xl font-bold">&times;</button>
+      </div>
+
+      <div>
+        <p class="text-xs text-gray-500 mb-1">เอกสารที่ต้องการแก้ไข:</p>
+        <p id="reuploadDocTypeName" class="font-bold text-sm text-brand-700"></p>
+      </div>
+
+      <div class="p-4 border-2 border-dashed border-gray-300 rounded-2xl text-center bg-slate-50">
+        <input type="file" id="reuploadFileInput" accept="image/jpeg,image/png,application/pdf" class="hidden" onchange="handleReuploadFileChange(this)">
+        <button type="button" onclick="document.getElementById('reuploadFileInput').click()" class="px-4 py-2 bg-white border border-gray-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-100 shadow-sm">
+          📁 เลือกไฟล์ใหม่ (JPG/PNG/PDF ไม่เกิน 5MB)
+        </button>
+        <p id="reuploadFileNameDisplay" class="text-xs font-bold text-emerald-600 mt-2"></p>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeReuploadModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100">ยกเลิก</button>
+        <button type="button" onclick="submitReuploadDoc()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow">
+          บันทึกและส่งตรวจใหม่
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentApplicantData = null;
+let reuploadTargetDocType = '';
+let reuploadSelectedFile = null;
+
+function handleStatusBirthChange(input) {
+  const val = input.value;
+  if (!val) return;
+  const parts = val.split('-');
+  const bYear = parseInt(parts[0], 10) + 543;
+  const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const monthName = thaiMonths[parseInt(parts[1], 10) - 1];
+  const day = parseInt(parts[2], 10);
+  document.getElementById('statusBirthThaiDisplay').textContent = `วันเกิด (พ.ศ.): ${day} ${monthName} ${bYear}`;
+  document.getElementById('status_birth_date').value = `${bYear}-${parts[1]}-${parts[2]}`;
+}
+
+function handleCheckStatus(e) {
+  e.preventDefault();
+  const citizenId = document.getElementById('status_citizen_id').value.trim();
+  const birthDate = document.getElementById('status_birth_date').value;
+
+  if (citizenId.length !== 13) {
+    showToast('กรุณาระบุเลขประจำตัวประชาชน 13 หลัก', 'error');
+    return;
+  }
+  if (!birthDate) {
+    showToast('กรุณาระบุวัน/เดือน/ปีเกิด', 'error');
+    return;
+  }
+
+  showLoading('กำลังตรวจสอบข้อมูลในระบบ...');
+
+  google.script.run
+    .withSuccessHandler(function(response) {
+      hideLoading();
+      if (response.success) {
+        currentApplicantData = response.data;
+        renderApplicantStatus(response.data);
+      } else {
+        document.getElementById('statusResultCard').classList.add('hidden');
+        showToast(response.message, 'error');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + err.message, 'error');
+    })
+    .apiCheckApplicantStatus(citizenId, birthDate);
+}
+
+function renderApplicantStatus(data) {
+  document.getElementById('resAppNo').textContent = data.application_no;
+  document.getElementById('resFullName').textContent = data.full_name;
+  document.getElementById('resLevel').textContent = data.education_level;
+  document.getElementById('resMajor1').textContent = data.quota_major_1;
+  document.getElementById('resCitizenId').textContent = data.masked_citizen_id;
+  document.getElementById('resApplyDate').textContent = data.apply_date;
+
+  // Status Badge
+  const badge = document.getElementById('resStatusBadge');
+  badge.textContent = data.current_status;
+  if (data.current_status === 'ผ่านการคัดเลือก') {
+    badge.className = 'inline-block px-4 py-2 rounded-2xl text-sm font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+  } else if (data.current_status === 'ไม่ผ่านการคัดเลือก') {
+    badge.className = 'inline-block px-4 py-2 rounded-2xl text-sm font-bold bg-red-100 text-red-800 border border-red-300';
+  } else if (data.current_status === 'เอกสารไม่ครบ') {
+    badge.className = 'inline-block px-4 py-2 rounded-2xl text-sm font-bold bg-amber-100 text-amber-800 border border-amber-300';
+  } else if (data.current_status === 'มอบตัวแล้ว') {
+    badge.className = 'inline-block px-4 py-2 rounded-2xl text-sm font-bold bg-purple-100 text-purple-800 border border-purple-300';
+  } else {
+    badge.className = 'inline-block px-4 py-2 rounded-2xl text-sm font-bold bg-sky-100 text-sky-800 border border-sky-300';
+  }
+
+  // Remarks Box
+  const remarksBox = document.getElementById('officerRemarksBox');
+  if (data.rejection_remarks) {
+    document.getElementById('resRemarksText').textContent = data.rejection_remarks;
+    remarksBox.classList.remove('hidden');
+  } else {
+    remarksBox.classList.add('hidden');
+  }
+
+  // Documents List
+  const docLabels = {
+    photo_1inch: 'รูปถ่ายหน้าตรง ขนาด 1 นิ้ว',
+    transcript_5term: 'เอกสารแสดงผลการเรียน 5 ภาคเรียน (ปพ.1)',
+    id_card_house_reg: 'สำเนาบัตรประชาชน / ทะเบียนบ้าน',
+    certificate_special: 'เกียรติบัตร / ใบรับรองความสามารถพิเศษ'
+  };
+
+  const docsContainer = document.getElementById('docsListContainer');
+  let docsHtml = '';
+
+  data.documents.forEach(doc => {
+    const isNeedFix = doc.verification_status === 'ต้องแก้ไข' || (data.current_status === 'เอกสารไม่ครบ' && doc.verification_status !== 'ผ่าน');
+    let statusClass = 'bg-sky-50 text-sky-700';
+    if (doc.verification_status === 'ผ่าน') statusClass = 'bg-emerald-50 text-emerald-700 font-bold';
+    else if (doc.verification_status === 'ต้องแก้ไข') statusClass = 'bg-amber-100 text-amber-800 font-bold';
+
+    docsHtml += `
+      <div class="p-3 bg-slate-50 border rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+        <div>
+          <p class="font-bold text-gray-800">${docLabels[doc.doc_type] || doc.doc_type}</p>
+          <p class="text-gray-400 text-[11px]">${doc.file_name || '-'}</p>
+          ${doc.feedback_note ? `<p class="text-amber-700 font-semibold mt-0.5">⚠️ ${doc.feedback_note}</p>` : ''}
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-1 rounded-xl ${statusClass}">${doc.verification_status || 'รอตรวจสอบ'}</span>
+          ${isNeedFix ? `
+            <button type="button" onclick="openReuploadModal('${doc.doc_type}', '${docLabels[doc.doc_type]}')" 
+                    class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-sm text-xs">
+              🔄 แก้ไขไฟล์นี้
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  docsContainer.innerHTML = docsHtml;
+  document.getElementById('statusResultCard').classList.remove('hidden');
+}
+
+function downloadPdfFromStatus() {
+  if (!currentApplicantData || !currentApplicantData.pdf_drive_id) {
+    showToast('ไม่พบไฟล์ PDF หรือไฟล์อยู่ระหว่างการจัดทำ', 'warning');
+    return;
+  }
+  const url = `<?= ScriptApp.getService().getUrl() ?>?action=download_pdf&id=${currentApplicantData.pdf_drive_id}`;
+  window.open(url, '_blank');
+}
+
+function openReuploadModal(docType, docLabel) {
+  reuploadTargetDocType = docType;
+  reuploadSelectedFile = null;
+  document.getElementById('reuploadDocTypeName').textContent = docLabel;
+  document.getElementById('reuploadFileNameDisplay').textContent = '';
+  document.getElementById('reuploadFileInput').value = '';
+  document.getElementById('reuploadModal').classList.remove('hidden');
+}
+
+function closeReuploadModal() {
+  document.getElementById('reuploadModal').classList.add('hidden');
+}
+
+function handleReuploadFileChange(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('ขนาดไฟล์เกิน 5 MB', 'error');
+    input.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    reuploadSelectedFile = {
+      name: file.name,
+      mimeType: file.type,
+      size: file.size,
+      base64: e.target.result.split(',')[1]
+    };
+    document.getElementById('reuploadFileNameDisplay').textContent = `✓ ${file.name}`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function submitReuploadDoc() {
+  if (!reuploadSelectedFile) {
+    showToast('กรุณาเลือกไฟล์ก่อนบันทึก', 'warning');
+    return;
+  }
+
+  const citizenId = document.getElementById('status_citizen_id').value.trim();
+  showLoading('กำลังอัปโหลดเอกสารฉบับแก้ไข...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.success) {
+        closeReuploadModal();
+        showToast(res.message, 'success');
+        // รีเฟรชข้อมูลสถานะ
+        document.querySelector('#statusResultCard').classList.add('hidden');
+        document.querySelector('form[onsubmit="handleCheckStatus(event)"]').dispatchEvent(new Event('submit'));
+      } else {
+        showToast(res.message, 'error');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    })
+    .apiReuploadDocument(currentApplicantData.application_no, citizenId, reuploadTargetDocType, reuploadSelectedFile);
+}
+</script>
+
+<!-- END applicant_status -->
+
+    </section>
+
+    <!-- แท็บที่ 3: ระบบเจ้าหน้าที่ (Phase 2) -->
+    <section id="tab-admin-content" class="tab-view hidden space-y-6">
+      
+      <!-- เมนูย่อยของเจ้าหน้าที่ (Dashboard / รายชื่อ / มอบตัว) -->
+      <div id="adminSubNav" class="hidden flex items-center gap-2 border-b border-gray-200 pb-3 overflow-x-auto no-scrollbar">
+        <button type="button" id="adminSubTabDashboard" onclick="switchAdminSubTab('dashboard')" 
+                class="admin-sub-tab px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white shadow-sm transition">
+          📊 แดชบอร์ดสถิติ
+        </button>
+        <button type="button" id="adminSubTabApplicants" onclick="switchAdminSubTab('applicants')" 
+                class="admin-sub-tab px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+          📋 รายชื่อผู้สมัครและตรวจเอกสาร
+        </button>
+        <button type="button" id="adminSubTabEnrollment" onclick="switchAdminSubTab('enrollment')" 
+                class="admin-sub-tab px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+          ✍️ บันทึกการมอบตัวนักเรียน
+        </button>
+      </div>
+
+      <!-- ส่วนประกอบย่อยของแอดมิน -->
+      <div id="admin-sub-dashboard" class="admin-sub-view">
+        
+<!-- BEGIN admin_dashboard -->
+<!-- แดชบอร์ดสรุปสถิติสำหรับผู้บริหารและเจ้าหน้าที่ (Phase 2) -->
+<div id="adminDashboardView" class="space-y-6">
+
+  <!-- Header & Refresh -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-gray-100">
+    <div>
+      <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+        <span>📊</span> แดชบอร์ดรายงานสถิติการรับสมัคร (โควตา 2570)
+      </h3>
+      <p class="text-xs text-gray-500">ข้อมูลสถิติผู้สมัครแบบ Real-time วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="button" onclick="loadDashboardData()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-gray-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+        🔄 รีเฟรชข้อมูล
+      </button>
+      <button type="button" onclick="exportDataCsv()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+        📥 ส่งออก CSV (ศธ.02)
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <!-- รวมทั้งหมด -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+      <p class="text-xs text-gray-400 font-semibold">ผู้สมัครทั้งหมด</p>
+      <p id="statTotal" class="text-2xl font-black text-brand-800 mt-1">0</p>
+      <span class="text-[11px] text-gray-400">คน</span>
+    </div>
+
+    <!-- รอตรวจสอบ -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+      <p class="text-xs text-sky-600 font-semibold">รอตรวจสอบ</p>
+      <p id="statPending" class="text-2xl font-black text-sky-600 mt-1">0</p>
+      <span class="text-[11px] text-sky-500">รอเจ้าหน้าที่ตรวจ</span>
+    </div>
+
+    <!-- เอกสารไม่ครบ -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+      <p class="text-xs text-amber-600 font-semibold">เอกสารไม่ครบ</p>
+      <p id="statIncomplete" class="text-2xl font-black text-amber-600 mt-1">0</p>
+      <span class="text-[11px] text-amber-500">รอส่งแก้ไข</span>
+    </div>
+
+    <!-- ผ่านการคัดเลือก -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+      <p class="text-xs text-emerald-600 font-semibold">ผ่านการคัดเลือก</p>
+      <p id="statPassed" class="text-2xl font-black text-emerald-600 mt-1">0</p>
+      <span class="text-[11px] text-emerald-500">มีสิทธิ์มอบตัว</span>
+    </div>
+
+    <!-- มอบตัวแล้ว -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 col-span-2 md:col-span-1">
+      <p class="text-xs text-purple-600 font-semibold">มอบตัวแล้ว</p>
+      <p id="statEnrolled" class="text-2xl font-black text-purple-600 mt-1">0</p>
+      <span class="text-[11px] text-purple-500">ออกรหัสนักเรียนแล้ว</span>
+    </div>
+  </div>
+
+  <!-- Charts Row 1: กราฟแท่งสาขาวิชา และ กราฟวงกลมระดับชั้น -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- กราฟแท่งสาขาวิชา -->
+    <div class="md:col-span-2 bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+      <h4 class="font-bold text-sm text-gray-800 mb-3">🛠 จำนวนผู้สมัครแยกตามสาขาวิชา (อันดับ 1)</h4>
+      <div class="h-64 relative">
+        <canvas id="chartMajors"></canvas>
+      </div>
+    </div>
+
+    <!-- กราฟวงกลมระดับชั้น -->
+    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+      <h4 class="font-bold text-sm text-gray-800 mb-3">🎓 สัดส่วนระดับการศึกษา</h4>
+      <div class="h-64 relative flex items-center justify-center">
+        <canvas id="chartLevels"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2: สถิติรายวัน และ ช่องทางที่รู้จัก -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- สถิติรายวัน -->
+    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+      <h4 class="font-bold text-sm text-gray-800 mb-3">📈 สถิติการสมัครรายวัน</h4>
+      <div class="h-56 relative">
+        <canvas id="chartDaily"></canvas>
+      </div>
+    </div>
+
+    <!-- ช่องทางที่รู้จักวิทยาลัย -->
+    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+      <h4 class="font-bold text-sm text-gray-800 mb-3">📢 ช่องทางที่ผู้สมัครรู้จักวิทยาลัย</h4>
+      <div id="referralList" class="space-y-2 mt-2">
+        <!-- Render ช่องทาง -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let majorChartInstance = null;
+let levelChartInstance = null;
+let dailyChartInstance = null;
+
+function loadDashboardData() {
+  const token = getAdminToken();
+  if (!token) return;
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (res.success && res.stats) {
+        renderDashboardStats(res.stats);
+      }
+    })
+    .apiGetDashboardStats(token);
+}
+
+function renderDashboardStats(stats) {
+  // ใส่ตัวเลขสรุป
+  document.getElementById('statTotal').textContent = stats.totalApplicants || 0;
+  document.getElementById('statPending').textContent = stats.pendingReview || 0;
+  document.getElementById('statIncomplete').textContent = stats.incomplete || 0;
+  document.getElementById('statPassed').textContent = stats.passed || 0;
+  document.getElementById('statEnrolled').textContent = stats.enrolled || 0;
+
+  // 1. Render กราฟแท่งสาขาวิชา
+  const majorLabels = Object.keys(stats.majorCounts || {});
+  const majorValues = Object.values(stats.majorCounts || {});
+
+  const ctxMajor = document.getElementById('chartMajors').getContext('2d');
+  if (majorChartInstance) majorChartInstance.destroy();
+  majorChartInstance = new Chart(ctxMajor, {
+    type: 'bar',
+    data: {
+      labels: majorLabels,
+      datasets: [{
+        label: 'จำนวนผู้สมัคร (คน)',
+        data: majorValues,
+        backgroundColor: '#0284c7',
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } },
+        x: { ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+
+  // 2. Render กราฟวงกลมระดับชั้น
+  const levelLabels = Object.keys(stats.levelCounts || {});
+  const levelValues = Object.values(stats.levelCounts || {});
+
+  const ctxLevel = document.getElementById('chartLevels').getContext('2d');
+  if (levelChartInstance) levelChartInstance.destroy();
+  levelChartInstance = new Chart(ctxLevel, {
+    type: 'doughnut',
+    data: {
+      labels: levelLabels,
+      datasets: [{
+        data: levelValues,
+        backgroundColor: ['#0284c7', '#0d9488', '#f59e0b', '#8b5cf6']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }
+    }
+  });
+
+  // 3. Render กราฟรายวัน
+  const dailyLabels = Object.keys(stats.dailyCounts || {}).sort();
+  const dailyValues = dailyLabels.map(k => stats.dailyCounts[k]);
+
+  const ctxDaily = document.getElementById('chartDaily').getContext('2d');
+  if (dailyChartInstance) dailyChartInstance.destroy();
+  dailyChartInstance = new Chart(ctxDaily, {
+    type: 'line',
+    data: {
+      labels: dailyLabels,
+      datasets: [{
+        label: 'จำนวนคน/วัน',
+        data: dailyValues,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+
+  // 4. Render รายการช่องทางที่รู้จัก
+  const referralContainer = document.getElementById('referralList');
+  let refHtml = '';
+  const total = stats.totalApplicants || 1;
+  for (const [refName, count] of Object.entries(stats.referralCounts || {})) {
+    const pct = Math.round((count / total) * 100);
+    refHtml += `
+      <div class="text-xs">
+        <div class="flex justify-between font-semibold text-gray-700 mb-1">
+          <span>${refName}</span>
+          <span>${count} คน (${pct}%)</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div class="bg-brand-500 h-2 rounded-full" style="width: ${pct}%"></div>
+        </div>
+      </div>
+    `;
+  }
+  referralContainer.innerHTML = refHtml || '<p class="text-xs text-gray-400">ยังไม่มีข้อมูล</p>';
+}
+</script>
+
+<!-- END admin_dashboard -->
+
+      </div>
+      <div id="admin-sub-applicants" class="admin-sub-view hidden">
+        
+<!-- BEGIN admin_applicants -->
+<!-- หน้ารายชื่อและตรวจสอบผู้สมัคร สำหรับเจ้าหน้าที่ (Phase 2) -->
+<div id="adminApplicantsView" class="space-y-6">
+
+  <!-- ============================================================== -->
+  <!-- กล่องล็อกอินเจ้าหน้าที่ (แสดงเมื่อยังไม่ได้ล็อกอิน) -->
+  <!-- ============================================================== -->
+  <div id="adminLoginBox" class="max-w-md mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 p-8 text-center my-8">
+    <div class="w-16 h-16 bg-brand-50 text-brand-600 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-4">
+      🔐
+    </div>
+    <h3 class="text-xl font-bold text-gray-900">เข้าสู่ระบบเจ้าหน้าที่</h3>
+    <p class="text-xs text-gray-500 mt-1 mb-6">สำหรับเจ้าหน้าที่ทะเบียนและผู้ดูแลระบบ วท.ท่าหลวงฯ</p>
+
+    <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left">
+      <div>
+        <label class="block text-xs font-semibold text-gray-700 mb-1">อีเมลผู้ใช้งาน (Google Account) <span class="text-red-500">*</span></label>
+        <input type="email" id="admin_login_email" required placeholder="admin@thaluang.ac.th" 
+               class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-brand-500">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-700 mb-1">รหัส PIN เจ้าหน้าที่ <span class="text-red-500">*</span></label>
+        <input type="password" id="admin_login_pin" required placeholder="•••••" 
+               class="w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-brand-500 font-mono tracking-widest">
+      </div>
+      <button type="submit" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-sm shadow transition mt-2">
+        เข้าสู่ระบบ
+      </button>
+    </form>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- พื้นที่ทำงานเจ้าหน้าที่ (แสดงเมื่อล็อกอินผ่าน) -->
+  <!-- ============================================================== -->
+  <div id="adminWorkspace" class="hidden space-y-4">
+
+    <!-- Top Action Bar -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-brand-100 text-brand-700 rounded-xl flex items-center justify-center font-bold text-sm">
+          👤
+        </div>
+        <div>
+          <p id="adminUserName" class="text-sm font-bold text-gray-900">-</p>
+          <div class="flex items-center gap-2">
+            <span id="adminUserRole" class="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md bg-brand-50 text-brand-700">-</span>
+            <span id="adminUserEmail" class="text-xs text-gray-400 font-mono">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="exportDataCsv()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-sm transition flex items-center gap-1.5">
+          📥 ส่งออก CSV (ศธ.02)
+        </button>
+        <button type="button" onclick="handleAdminLogout()" class="px-3 py-2 bg-slate-100 hover:bg-red-50 text-gray-600 hover:text-red-600 font-semibold rounded-xl text-xs transition">
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter & Search Card -->
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+        <!-- ค้นหา -->
+        <div class="md:col-span-2">
+          <input type="text" id="filterSearch" placeholder="🔍 ค้นหาชื่อ, เลขที่ใบสมัคร, รร.เดิม, เบอร์โทร..." 
+                 oninput="debounceSearch()" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs">
+        </div>
+        <!-- สถานะ -->
+        <div>
+          <select id="filterStatus" onchange="fetchApplicantsList(1)" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs bg-white">
+            <option value="">-- ทุกสถานะ --</option>
+            <option value="รอตรวจสอบ">รอตรวจสอบ</option>
+            <option value="เอกสารไม่ครบ">เอกสารไม่ครบ</option>
+            <option value="ผ่านการคัดเลือก">ผ่านการคัดเลือก</option>
+            <option value="ไม่ผ่านการคัดเลือก">ไม่ผ่านการคัดเลือก</option>
+            <option value="มอบตัวแล้ว">มอบตัวแล้ว</option>
+          </select>
+        </div>
+        <!-- ระดับ -->
+        <div>
+          <select id="filterLevel" onchange="fetchApplicantsList(1)" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs bg-white">
+            <option value="">-- ทุกระดับชั้น --</option>
+            <option value="ปวช.">ปวช.</option>
+            <option value="ปวส. (สายตรง)">ปวส. (สายตรง)</option>
+            <option value="ปวส. (ม.6/ปวช. ต่างสาขา)">ปวส. (ม.6/ต่างสาขา)</option>
+          </select>
+        </div>
+        <!-- รีเซ็ต -->
+        <div>
+          <button type="button" onclick="resetApplicantFilters()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-gray-700 text-xs font-semibold rounded-xl transition">
+            ล้างตัวกรอง
+          </button>
+        </div>
+      </div>
+
+      <!-- Batch Action Toolbar -->
+      <div id="batchActionToolbar" class="p-3 bg-brand-50 border border-brand-200 rounded-xl flex items-center justify-between text-xs hidden">
+        <span class="font-bold text-brand-800">
+          เลือกแล้ว <span id="batchSelectedCount">0</span> รายการ
+        </span>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="openBatchStatusModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg shadow-sm">
+            ⚡ ปรับเปลี่ยนสถานะพร้อมกัน
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Applicants Data Table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-50 border-b border-gray-200 text-gray-600 font-bold uppercase tracking-wider">
+              <th class="p-3 w-10 text-center">
+                <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAllApplicants(this)" class="rounded">
+              </th>
+              <th class="p-3">เลขที่ใบสมัคร</th>
+              <th class="p-3">วันที่สมัคร</th>
+              <th class="p-3">ระดับ</th>
+              <th class="p-3">ชื่อ-นามสกุล</th>
+              <th class="p-3">เลขบัตร ปชช. (PDPA)</th>
+              <th class="p-3">สาขาวิชาที่สมัคร (1)</th>
+              <th class="p-3 text-center">GPAX</th>
+              <th class="p-3 text-center">สถานะ</th>
+              <th class="p-3 text-center">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="applicantsTableBody" class="divide-y divide-gray-100">
+            <!-- Render ข้อมูลในตาราง -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="p-3 bg-slate-50 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600">
+        <div>
+          แสดง <span id="pageRangeDisplay">0-0</span> จากทั้งหมด <span id="totalApplicantsCount">0</span> รายการ
+        </div>
+        <div class="flex items-center gap-1">
+          <button type="button" id="prevPageBtn" onclick="changeApplicantPage(-1)" class="px-3 py-1 border rounded-lg bg-white disabled:opacity-40">
+            ← ก่อนหน้า
+          </button>
+          <span id="currentPageIndicator" class="px-2 font-bold text-gray-800">1 / 1</span>
+          <button type="button" id="nextPageBtn" onclick="changeApplicantPage(1)" class="px-3 py-1 border rounded-lg bg-white disabled:opacity-40">
+            ถัดไป →
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- Modal ดูรายละเอียดและตรวจเอกสารรายบุคคล (Applicant Detail Modal) -->
+  <!-- ============================================================== -->
+  <div id="applicantDetailModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl relative max-h-[92vh] flex flex-col space-y-4">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+        <div>
+          <span class="text-xs text-gray-400 font-mono">ตรวจสอบใบสมัคร</span>
+          <h4 id="modalAppNo" class="text-xl font-bold text-brand-800 font-mono">-</h4>
+        </div>
+        <button type="button" onclick="closeApplicantDetailModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+      </div>
+
+      <!-- Modal Body Scrollable -->
+      <div class="overflow-y-auto space-y-6 flex-1 pr-1 text-xs">
+        
+        <!-- ข้อมูลส่วนตัวและครอบครัว -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div class="space-y-1">
+            <h5 class="font-bold text-gray-800 text-sm mb-2">👤 ข้อมูลผู้สมัคร (ข้อ 1)</h5>
+            <p><span class="text-gray-400">ชื่อ-สกุล:</span> <strong id="modalFullName" class="text-gray-900">-</strong></p>
+            <p><span class="text-gray-400">เลขบัตรประชาชน:</span> <strong id="modalCitizenId" class="text-brand-700 font-mono text-sm">-</strong></p>
+            <p><span class="text-gray-400">วันเดือนปีเกิด:</span> <span id="modalBirthDate">-</span></p>
+            <p><span class="text-gray-400">โทรศัพท์:</span> <span id="modalPhone">-</span></p>
+            <p><span class="text-gray-400">อีเมล:</span> <span id="modalEmail">-</span></p>
+          </div>
+          <div class="space-y-1">
+            <h5 class="font-bold text-gray-800 text-sm mb-2">👨‍👩‍👦 ข้อมูลครอบครัว (ข้อ 2-3)</h5>
+            <p><span class="text-gray-400">บิดา:</span> <span id="modalFather">-</span></p>
+            <p><span class="text-gray-400">มารดา:</span> <span id="modalMother">-</span></p>
+            <p><span class="text-gray-400">ที่อยู่:</span> <span id="modalAddress">-</span></p>
+          </div>
+        </div>
+
+        <!-- ข้อมูลการศึกษาและการสมัคร -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div class="space-y-1">
+            <h5 class="font-bold text-gray-800 text-sm mb-2">🏫 โรงเรียนเดิม (ข้อ 5)</h5>
+            <p><span class="text-gray-400">โรงเรียน:</span> <strong id="modalSchoolName">-</strong></p>
+            <p><span class="text-gray-400">ระดับเดิม:</span> <span id="modalSchoolLevel">-</span></p>
+            <p><span class="text-gray-400">เกรดเฉลี่ยสะสม (GPAX):</span> <strong id="modalGpax" class="text-emerald-700 text-sm font-mono">-</strong></p>
+            <p><span class="text-gray-400">สาขาเดิม (ถ้ามี):</span> <span id="modalPrevMajor">-</span></p>
+          </div>
+          <div class="space-y-1">
+            <h5 class="font-bold text-gray-800 text-sm mb-2">🎯 สาขาที่สมัคร (ข้อ 6)</h5>
+            <p><span class="text-gray-400">ระดับที่สมัคร:</span> <strong id="modalLevel">-</strong></p>
+            <p><span class="text-gray-400">สาขาอันดับ 1:</span> <strong id="modalMajor1" class="text-brand-800">-</strong></p>
+            <p><span class="text-gray-400">สาขาอันดับ 2:</span> <span id="modalMajor2">-</span></p>
+            <p><span class="text-gray-400">ช่องทางที่รู้จัก:</span> <span id="modalReferral">-</span></p>
+          </div>
+        </div>
+
+        <!-- รายการเอกสารแนบและการตรวจ -->
+        <div class="space-y-3">
+          <h5 class="font-bold text-gray-800 text-sm">📁 เอกสารประกอบการสมัคร (เปิดดูผ่านระบบ Private Proxy)</h5>
+          <div id="modalDocsContainer" class="space-y-2">
+            <!-- Render ไฟล์แนบ -->
+          </div>
+        </div>
+
+        <!-- ฟอร์มเปลี่ยนสถานะและหมายเหตุ -->
+        <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 space-y-3">
+          <h5 class="font-bold text-amber-900 text-sm">✏️ ปรับเปลี่ยนสถานะใบสมัคร</h5>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1">สถานะใหม่ <span class="text-red-500">*</span></label>
+              <select id="modalNewStatusSelect" class="w-full px-3 py-2 rounded-xl border border-amber-300 text-xs bg-white font-bold">
+                <option value="รอตรวจสอบ">รอตรวจสอบ</option>
+                <option value="เอกสารไม่ครบ">เอกสารไม่ครบ (ให้ผู้สมัครแก้ไข)</option>
+                <option value="ผ่านการคัดเลือก">ผ่านการคัดเลือก (มีสิทธิ์มอบตัว)</option>
+                <option value="ไม่ผ่านการคัดเลือก">ไม่ผ่านการคัดเลือก</option>
+                <option value="มอบตัวแล้ว">มอบตัวแล้ว</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-1">หมายเหตุ / สิ่งที่ต้องแก้ไข (แจ้งผู้สมัครทาง Email/LINE)</label>
+              <input type="text" id="modalStatusRemarks" placeholder="เช่น กรุณาแนบใบ ปพ.1 ด้านหลังที่มีเกรดชัดเจน" class="w-full px-3 py-2 rounded-xl border border-amber-300 text-xs bg-white">
+            </div>
+          </div>
+        </div>
+
+        <!-- ประวัติการเปลี่ยนสถานะ (StatusLog) -->
+        <div class="space-y-2">
+          <h5 class="font-bold text-gray-700 text-xs">🕒 ประวัติการเปลี่ยนสถานะ (Status Log)</h5>
+          <div id="modalStatusLogContainer" class="space-y-1 max-h-32 overflow-y-auto">
+            <!-- Render Logs -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
+        <button type="button" id="modalDownloadPdfBtn" onclick="downloadSelectedApplicantPdf()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-gray-700 text-xs font-bold rounded-xl transition">
+          📄 ดาวน์โหลดใบสมัคร PDF
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeApplicantDetailModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">
+            ปิด
+          </button>
+          <button type="button" onclick="saveApplicantStatusChange()" class="px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md transition">
+            💾 บันทึกผลการตรวจ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview Modal สำหรับดูไฟล์แนบแบบ Base64 -->
+  <div id="filePreviewModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black bg-opacity-70 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-4 shadow-2xl relative max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center pb-2 border-b">
+        <h5 id="previewFileName" class="text-sm font-bold text-gray-800 truncate"></h5>
+        <button type="button" onclick="closeFilePreviewModal()" class="text-gray-400 text-2xl font-bold">&times;</button>
+      </div>
+      <div id="previewContentContainer" class="flex-1 overflow-auto p-4 flex items-center justify-center min-h-[300px]">
+        <!-- Render Image or PDF embed -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal สำหรับ Batch Update Status -->
+  <div id="batchStatusModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <h4 class="font-bold text-gray-900 text-base">⚡ ปรับเปลี่ยนสถานะพร้อมกันหลายรายการ</h4>
+      <div>
+        <label class="block text-xs font-semibold text-gray-700 mb-1">เลือกสถานะใหม่ <span class="text-red-500">*</span></label>
+        <select id="batchNewStatusSelect" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs bg-white font-bold">
+          <option value="ผ่านการคัดเลือก">ผ่านการคัดเลือก</option>
+          <option value="เอกสารไม่ครบ">เอกสารไม่ครบ</option>
+          <option value="ไม่ผ่านการคัดเลือก">ไม่ผ่านการคัดเลือก</option>
+          <option value="รอตรวจสอบ">รอตรวจสอบ</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-700 mb-1">หมายเหตุเพิ่มเติม</label>
+        <input type="text" id="batchRemarksInput" placeholder="ระบุหมายเหตุ (ถ้ามี)" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeBatchStatusModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">ยกเลิก</button>
+        <button type="button" onclick="submitBatchStatusChange()" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow">
+          ยืนยันการปรับสถานะ
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentAdminUser = null;
+let currentApplicantPage = 1;
+const applicantPageSize = 20;
+let searchDebounceTimeout = null;
+let selectedApplicantNos = new Set();
+let activeDetailAppNo = '';
+let activeDetailPdfId = '';
+
+function getAdminToken() {
+  return localStorage.getItem('thaluang_quota_admin_token') || '';
+}
+
+function handleAdminLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('admin_login_email').value.trim();
+  const pin = document.getElementById('admin_login_pin').value.trim();
+
+  showLoading('กำลังตรวจสอบสิทธิ์เข้าใช้งาน...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.success && res.token) {
+        localStorage.setItem('thaluang_quota_admin_token', res.token);
+        localStorage.setItem('thaluang_quota_admin_user', JSON.stringify(res.user));
+        showToast('เข้าสู่ระบบสำเร็จ', 'success');
+        checkAdminAuth();
+      } else {
+        showToast(res.message || 'เข้าสู่ระบบไม่สำเร็จ', 'error');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    })
+    .apiAdminLogin(email, pin);
+}
+
+function handleAdminLogout() {
+  localStorage.removeItem('thaluang_quota_admin_token');
+  localStorage.removeItem('thaluang_quota_admin_user');
+  checkAdminAuth();
+  showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
+}
+
+function checkAdminAuth() {
+  const token = getAdminToken();
+  const userJson = localStorage.getItem('thaluang_quota_admin_user');
+
+  if (token && userJson) {
+    currentAdminUser = JSON.parse(userJson);
+    document.getElementById('adminLoginBox').classList.add('hidden');
+    document.getElementById('adminWorkspace').classList.remove('hidden');
+    document.getElementById('adminUserName').textContent = currentAdminUser.name || currentAdminUser.email;
+    document.getElementById('adminUserRole').textContent = currentAdminUser.role || 'REGISTRAR';
+    document.getElementById('adminUserEmail').textContent = currentAdminUser.email;
+    fetchApplicantsList(1);
+    loadDashboardData();
+  } else {
+    document.getElementById('adminLoginBox').classList.remove('hidden');
+    document.getElementById('adminWorkspace').classList.add('hidden');
+  }
+}
+
+function debounceSearch() {
+  clearTimeout(searchDebounceTimeout);
+  searchDebounceTimeout = setTimeout(() => {
+    fetchApplicantsList(1);
+  }, 400);
+}
+
+function resetApplicantFilters() {
+  document.getElementById('filterSearch').value = '';
+  document.getElementById('filterStatus').value = '';
+  document.getElementById('filterLevel').value = '';
+  fetchApplicantsList(1);
+}
+
+function fetchApplicantsList(page = 1) {
+  const token = getAdminToken();
+  if (!token) return;
+
+  currentApplicantPage = page;
+  const filter = {
+    search: document.getElementById('filterSearch').value.trim(),
+    status: document.getElementById('filterStatus').value,
+    level: document.getElementById('filterLevel').value,
+    page: currentApplicantPage,
+    pageSize: applicantPageSize
+  };
+
+  showLoading('กำลังโหลดข้อมูล...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.success) {
+        renderApplicantsTable(res);
+      } else {
+        showToast(res.message, 'error');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    })
+    .apiGetApplicantsList(filter, token);
+}
+
+function renderApplicantsTable(res) {
+  const tbody = document.getElementById('applicantsTableBody');
+  const rows = res.data || [];
+  selectedApplicantNos.clear();
+  updateBatchToolbar();
+  document.getElementById('selectAllCheckbox').checked = false;
+
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-gray-400">ไม่พบข้อมูลผู้สมัครตามเงื่อนไขที่เลือก</td></tr>`;
+    document.getElementById('totalApplicantsCount').textContent = '0';
+    document.getElementById('pageRangeDisplay').textContent = '0-0';
+    document.getElementById('currentPageIndicator').textContent = '1 / 1';
+    return;
+  }
+
+  let html = '';
+  rows.forEach(r => {
+    let statusClass = 'bg-sky-50 text-sky-700';
+    if (r.current_status === 'ผ่านการคัดเลือก') statusClass = 'bg-emerald-100 text-emerald-800 font-bold';
+    else if (r.current_status === 'เอกสารไม่ครบ') statusClass = 'bg-amber-100 text-amber-800 font-bold';
+    else if (r.current_status === 'ไม่ผ่านการคัดเลือก') statusClass = 'bg-red-100 text-red-800 font-bold';
+    else if (r.current_status === 'มอบตัวแล้ว') statusClass = 'bg-purple-100 text-purple-800 font-bold';
+
+    html += `
+      <tr class="hover:bg-slate-50 transition border-b border-gray-50">
+        <td class="p-3 text-center">
+          <input type="checkbox" value="${r.application_no}" onchange="toggleSelectApplicant(this)" class="rounded app-checkbox">
+        </td>
+        <td class="p-3 font-mono font-bold text-brand-700">${r.application_no}</td>
+        <td class="p-3 text-gray-500">${r.apply_date}</td>
+        <td class="p-3 font-medium text-gray-700">${r.education_level}</td>
+        <td class="p-3 font-bold text-gray-900">${r.full_name}</td>
+        <td class="p-3 font-mono text-gray-500">${r.masked_citizen_id}</td>
+        <td class="p-3 text-gray-700 truncate max-w-[160px]">${r.quota_major_1}</td>
+        <td class="p-3 text-center font-mono font-bold">${r.gpax || '-'}</td>
+        <td class="p-3 text-center">
+          <span class="px-2 py-0.5 rounded-full text-[11px] ${statusClass}">${r.current_status}</span>
+        </td>
+        <td class="p-3 text-center">
+          <button type="button" onclick="openApplicantDetails('${r.application_no}')" 
+                  class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg text-xs transition">
+            🔍 ตรวจสอบ
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+
+  // Pagination Text
+  const total = res.totalCount || 0;
+  const start = (currentApplicantPage - 1) * applicantPageSize + 1;
+  const end = Math.min(start + rows.length - 1, total);
+  document.getElementById('pageRangeDisplay').textContent = `${start}-${end}`;
+  document.getElementById('totalApplicantsCount').textContent = total;
+  document.getElementById('currentPageIndicator').textContent = `${res.page} / ${res.totalPages || 1}`;
+
+  document.getElementById('prevPageBtn').disabled = currentApplicantPage <= 1;
+  document.getElementById('nextPageBtn').disabled = currentApplicantPage >= (res.totalPages || 1);
+}
+
+function changeApplicantPage(delta) {
+  fetchApplicantsList(currentApplicantPage + delta);
+}
+
+function toggleSelectApplicant(checkbox) {
+  if (checkbox.checked) {
+    selectedApplicantNos.add(checkbox.value);
+  } else {
+    selectedApplicantNos.delete(checkbox.value);
+  }
+  updateBatchToolbar();
+}
+
+function toggleSelectAllApplicants(masterCheckbox) {
+  const checkboxes = document.querySelectorAll('.app-checkbox');
+  checkboxes.forEach(cb => {
+    cb.checked = masterCheckbox.checked;
+    if (masterCheckbox.checked) {
+      selectedApplicantNos.add(cb.value);
+    } else {
+      selectedApplicantNos.delete(cb.value);
+    }
+  });
+  updateBatchToolbar();
+}
+
+function updateBatchToolbar() {
+  const count = selectedApplicantNos.size;
+  document.getElementById('batchSelectedCount').textContent = count;
+  const toolbar = document.getElementById('batchActionToolbar');
+  if (count > 0) {
+    toolbar.classList.remove('hidden');
+  } else {
+    toolbar.classList.add('hidden');
+  }
+}
+
+function openBatchStatusModal() {
+  document.getElementById('batchStatusModal').classList.remove('hidden');
+}
+function closeBatchStatusModal() {
+  document.getElementById('batchStatusModal').classList.add('hidden');
+}
+
+function submitBatchStatusChange() {
+  const newStatus = document.getElementById('batchNewStatusSelect').value;
+  const remarks = document.getElementById('batchRemarksInput').value.trim();
+  const token = getAdminToken();
+
+  showLoading('กำลังปรับเปลี่ยนสถานะทั้งหมด...');
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      closeBatchStatusModal();
+      showToast(res.message, 'success');
+      fetchApplicantsList(currentApplicantPage);
+      loadDashboardData();
+    })
+    .apiBatchUpdateStatus(Array.from(selectedApplicantNos), newStatus, remarks, token);
+}
+
+/**
+ * เปิด Modal ดูรายละเอียดผู้สมัครรายบุคคล
+ */
+function openApplicantDetails(applicationNo) {
+  activeDetailAppNo = applicationNo;
+  const token = getAdminToken();
+  showLoading('กำลังโหลดรายละเอียด...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.success) {
+        populateApplicantDetailsModal(res);
+        document.getElementById('applicantDetailModal').classList.remove('hidden');
+      } else {
+        showToast(res.message, 'error');
+      }
+    })
+    .apiGetApplicantDetails(applicationNo, token);
+}
+
+function closeApplicantDetailModal() {
+  document.getElementById('applicantDetailModal').classList.add('hidden');
+}
+
+function populateApplicantDetailsModal(data) {
+  const a = data.applicant;
+  activeDetailPdfId = a.pdf_drive_id;
+
+  document.getElementById('modalAppNo').textContent = a.application_no;
+  document.getElementById('modalFullName').textContent = `${a.title}${a.first_name} ${a.last_name}`;
+  // เลขบัตร ปชช. แสดงแบบเต็มสำหรับเจ้าหน้าที่ที่มีสิทธิ์
+  document.getElementById('modalCitizenId').textContent = a.citizen_id;
+  document.getElementById('modalBirthDate').textContent = a.birth_date;
+  document.getElementById('modalPhone').textContent = a.phone;
+  document.getElementById('modalEmail').textContent = a.email || '-';
+
+  document.getElementById('modalFather').textContent = `${a.father_name || '-'} (อายุ ${a.father_age || '-'} ปี / อาชีพ ${a.father_occupation || '-'})`;
+  document.getElementById('modalMother').textContent = `${a.mother_name || '-'} (อายุ ${a.mother_age || '-'} ปี / อาชีพ ${a.mother_occupation || '-'})`;
+  document.getElementById('modalAddress').textContent = `${a.address_no || ''} ม.${a.address_moo || '-'} ต.${a.subdistrict || ''} อ.${a.district || ''} จ.${a.province || ''} ${a.zipcode || ''}`;
+
+  document.getElementById('modalSchoolName').textContent = a.current_school_name;
+  document.getElementById('modalSchoolLevel').textContent = a.current_school_level;
+  document.getElementById('modalGpax').textContent = a.gpax;
+  document.getElementById('modalPrevMajor').textContent = a.prev_major || '-';
+
+  document.getElementById('modalLevel').textContent = a.education_level;
+  document.getElementById('modalMajor1').textContent = a.quota_major_1;
+  document.getElementById('modalMajor2').textContent = a.quota_major_2 || '-';
+  document.getElementById('modalReferral').textContent = a.referral_source || '-';
+
+  document.getElementById('modalNewStatusSelect').value = a.current_status || 'รอตรวจสอบ';
+  document.getElementById('modalStatusRemarks').value = a.rejection_remarks || '';
+
+  // Render Documents
+  const docsContainer = document.getElementById('modalDocsContainer');
+  let docsHtml = '';
+  const docLabels = {
+    photo_1inch: 'รูปถ่ายหน้าตรง 1 นิ้ว',
+    transcript_5term: 'ปพ.1 (5 ภาคเรียน)',
+    id_card_house_reg: 'สำเนาบัตร ปชช. / ทะเบียนบ้าน',
+    certificate_special: 'เกียรติบัตร / รางวัล'
+  };
+
+  (data.documents || []).forEach(d => {
+    docsHtml += `
+      <div class="p-3 bg-white border border-gray-200 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-2">
+        <div>
+          <span class="font-bold text-gray-800">${docLabels[d.doc_type] || d.doc_type}</span>
+          <span class="text-gray-400 text-[11px] block">${d.file_name}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="previewDriveFile('${d.drive_file_id}', '${d.file_name}')" 
+                  class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg text-xs">
+            👁 ดูไฟล์
+          </button>
+          <select data-doc-id="${d.doc_id}" class="modal-doc-status px-2 py-1 border rounded-lg text-xs font-semibold bg-slate-50">
+            <option value="รอตรวจสอบ" ${d.verification_status === 'รอตรวจสอบ' ? 'selected' : ''}>รอตรวจสอบ</option>
+            <option value="ผ่าน" ${d.verification_status === 'ผ่าน' ? 'selected' : ''}>ผ่าน ✓</option>
+            <option value="ต้องแก้ไข" ${d.verification_status === 'ต้องแก้ไข' ? 'selected' : ''}>ต้องแก้ไข ⚠️</option>
+          </select>
+        </div>
+      </div>
+    `;
+  });
+  docsContainer.innerHTML = docsHtml || '<p class="text-gray-400">ไม่มีไฟล์แนบ</p>';
+
+  // Render Status Logs
+  const logContainer = document.getElementById('modalStatusLogContainer');
+  let logHtml = '';
+  (data.statusLogs || []).forEach(l => {
+    logHtml += `
+      <div class="text-[11px] text-gray-600 bg-white p-2 rounded-lg border border-gray-100 flex justify-between">
+        <span><strong>${l.new_status}</strong> (${l.remarks || 'ไม่มีหมายเหตุ'}) โดย ${l.changed_by}</span>
+        <span class="text-gray-400 font-mono">${l.timestamp}</span>
+      </div>
+    `;
+  });
+  logContainer.innerHTML = logHtml || '<p class="text-gray-400 text-[11px]">ไม่มีประวัติ</p>';
+}
+
+function saveApplicantStatusChange() {
+  const newStatus = document.getElementById('modalNewStatusSelect').value;
+  const remarks = document.getElementById('modalStatusRemarks').value.trim();
+  const token = getAdminToken();
+
+  // รวบรวมผลตรวจเอกสารรายชิ้น
+  const docFeedbacks = [];
+  document.querySelectorAll('.modal-doc-status').forEach(sel => {
+    docFeedbacks.push({
+      doc_id: sel.getAttribute('data-doc-id'),
+      verification_status: sel.value,
+      feedback_note: sel.value === 'ต้องแก้ไข' ? remarks : ''
+    });
+  });
+
+  showLoading('กำลังบันทึกสถานะและส่งแจ้งเตือน...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.success) {
+        closeApplicantDetailModal();
+        showToast(res.message, 'success');
+        fetchApplicantsList(currentApplicantPage);
+        loadDashboardData();
+      } else {
+        showToast(res.message, 'error');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    })
+    .apiUpdateApplicantStatus(activeDetailAppNo, newStatus, remarks, docFeedbacks, token);
+}
+
+function previewDriveFile(fileId, fileName) {
+  const token = getAdminToken();
+  showLoading('กำลังโหลดไฟล์จาก Drive...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.success) {
+        document.getElementById('previewFileName').textContent = fileName;
+        const container = document.getElementById('previewContentContainer');
+        if (res.mimeType.startsWith('image/')) {
+          container.innerHTML = `<img src="data:${res.mimeType};base64,${res.base64}" class="max-h-[70vh] object-contain rounded-xl shadow">`;
+        } else if (res.mimeType === 'application/pdf') {
+          container.innerHTML = `<iframe src="data:application/pdf;base64,${res.base64}" class="w-full h-[70vh] rounded-xl border"></iframe>`;
+        } else {
+          container.innerHTML = `<p class="text-gray-500">ไม่สามารถแสดงตัวอย่างไฟล์ชนิดนี้ได้โดยตรง</p>`;
+        }
+        document.getElementById('filePreviewModal').classList.remove('hidden');
+      } else {
+        showToast(res.message || 'ไม่สามารถเปิดไฟล์ได้', 'error');
+      }
+    })
+    .apiGetFileProxy(fileId, token);
+}
+
+function closeFilePreviewModal() {
+  document.getElementById('filePreviewModal').classList.add('hidden');
+}
+
+function downloadSelectedApplicantPdf() {
+  if (!activeDetailPdfId) {
+    showToast('ไม่พบไฟล์ PDF ใบสมัคร', 'warning');
+    return;
+  }
+  const url = `<?= ScriptApp.getService().getUrl() ?>?action=download_pdf&id=${activeDetailPdfId}`;
+  window.open(url, '_blank');
+}
+
+function exportDataCsv() {
+  const token = getAdminToken();
+  if (!token) {
+    showToast('กรุณาเข้าสู่ระบบก่อนส่งออกข้อมูล', 'error');
+    return;
+  }
+
+  showLoading('กำลังจัดเตรียมไฟล์ CSV สำหรับระบบ ศธ.02...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.success && res.csvContent) {
+        const blob = new Blob([new Uint8Array(atob(res.csvContent).split('').map(c => c.charCodeAt(0)))], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = res.fileName;
+        link.click();
+        showToast('ส่งออกข้อมูล CSV สำเร็จ', 'success');
+      } else {
+        showToast(res.message || 'ไม่สามารถส่งออกข้อมูลได้', 'error');
+      }
+    })
+    .apiExportApplicantsCsv({}, token);
+}
+</script>
+
+<!-- END admin_applicants -->
+
+      </div>
+      <div id="admin-sub-enrollment" class="admin-sub-view hidden">
+        
+<!-- BEGIN admin_enrollment -->
+<!-- หน้าระบบบันทึกการมอบตัวและออกรหัสนักเรียนใหม่ (Phase 2) -->
+<div id="adminEnrollmentView" class="max-w-3xl mx-auto space-y-6">
+
+  <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 p-6 md:p-8 space-y-6">
+    <!-- Header -->
+    <div class="flex items-center gap-3 pb-4 border-b border-gray-100">
+      <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-2xl">
+        ✍️
+      </div>
+      <div>
+        <h3 class="text-xl font-bold text-gray-900">บันทึกการมอบตัวและทำสัญญาเข้าศึกษา</h3>
+        <p class="text-xs text-gray-500">สำหรับผู้สมัครที่ "ผ่านการคัดเลือก" ประจำปีการศึกษา 2570</p>
+      </div>
+    </div>
+
+    <!-- ค้นหาใบสมัครที่ผ่านการคัดเลือก -->
+    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+      <label class="block text-xs font-bold text-gray-700">ระบุเลขที่ใบสมัครของผู้ที่ผ่านการคัดเลือก</label>
+      <div class="flex gap-2">
+        <input type="text" id="enrollSearchAppNo" placeholder="เช่น Q70-0001" 
+               class="flex-1 px-3 py-2.5 rounded-xl border border-gray-300 text-sm font-mono uppercase">
+        <button type="button" onclick="loadApplicantForEnroll()" 
+                class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow transition">
+          ดึงข้อมูล
+        </button>
+      </div>
+    </div>
+
+    <!-- ฟอร์มการมอบตัว (แสดงเมื่อดึงข้อมูลสำเร็จ) -->
+    <form id="enrollmentForm" onsubmit="submitEnrollment(event)" class="space-y-5 hidden">
+      
+      <!-- ข้อมูลผู้ผ่านการคัดเลือก -->
+      <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs space-y-1">
+        <p><span class="text-gray-500">ชื่อ-สกุล:</span> <strong id="enrollStudentName" class="text-emerald-900 text-sm">-</strong></p>
+        <p><span class="text-gray-500">เลขบัตรประชาชน:</span> <span id="enrollCitizenId" class="font-mono font-bold">-</span></p>
+        <p><span class="text-gray-500">ระดับที่สมัคร:</span> <span id="enrollLevel">-</span></p>
+        <p><span class="text-gray-500">สาขาวิชา:</span> <strong id="enrollMajor" class="text-brand-800">-</strong></p>
+      </div>
+
+      <!-- รหัสนักเรียนใหม่ -->
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+        <label class="block text-xs font-bold text-gray-700">
+          รหัสนักเรียนใหม่ (สร้างอัตโนมัติตามรูปแบบ 7020101XXXX หรือระบุเอง) <span class="text-red-500">*</span>
+        </label>
+        <div class="flex gap-2">
+          <input type="text" id="enrollStudentId" required placeholder="70201010001" 
+                 class="w-full px-3 py-2.5 rounded-xl border border-gray-300 font-mono font-bold text-sm tracking-widest text-brand-700">
+        </div>
+      </div>
+
+      <!-- ข้อมูลผู้ปกครองที่มาทำสัญญา -->
+      <div class="space-y-3">
+        <h4 class="font-bold text-sm text-gray-800">👨‍👩‍👦 ข้อมูลผู้ปกครองที่มามอบตัว</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ชื่อ-สกุล ผู้ปกครอง <span class="text-red-500">*</span></label>
+            <input type="text" id="guardian_name" required placeholder="นายสมศักดิ์ ใจดี" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ความเกี่ยวข้องกับนักเรียน <span class="text-red-500">*</span></label>
+            <select id="guardian_relation" required class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs bg-white">
+              <option value="บิดา">บิดา</option>
+              <option value="มารดา">มารดา</option>
+              <option value="ปู่ / ย่า / ตา / ยาย">ปู่ / ย่า / ตา / ยาย</option>
+              <option value="ลุง / ป้า / น้า / อา">ลุง / ป้า / น้า / อา</option>
+              <option value="ผู้ปกครองตามกฎหมาย">ผู้ปกครองตามกฎหมาย</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">เบอร์โทรศัพท์ผู้ปกครอง <span class="text-red-500">*</span></label>
+            <input type="tel" id="guardian_phone" maxlength="10" required placeholder="0812345678" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">อาชีพผู้ปกครอง <span class="text-red-500">*</span></label>
+            <input type="text" id="guardian_occupation" required placeholder="รับจ้าง / ข้าราชการ" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs">
+          </div>
+        </div>
+      </div>
+
+      <!-- พยาน -->
+      <div class="space-y-3 border-t pt-3">
+        <h4 class="font-bold text-sm text-gray-800">🖊️ พยานในการทำสัญญา</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ชื่อ-สกุล พยานคนที่ 1</label>
+            <input type="text" id="witness_1_name" placeholder="ชื่อ-สกุล พยานคนที่ 1" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">ชื่อ-สกุล พยานคนที่ 2</label>
+            <input type="text" id="witness_2_name" placeholder="ชื่อ-สกุล พยานคนที่ 2" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs">
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t flex justify-end gap-3">
+        <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow transition flex items-center gap-2">
+          <span>💾 บันทึกการมอบตัวและพิมพ์ใบมอบตัว PDF</span>
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Success Modal หลังมอบตัว -->
+    <div id="enrollSuccessBox" class="p-6 bg-emerald-50 rounded-2xl border border-emerald-200 text-center space-y-3 hidden">
+      <div class="text-4xl">🎉</div>
+      <h4 class="text-lg font-bold text-emerald-800">บันทึกการมอบตัวสำเร็จเรียบร้อยแล้ว</h4>
+      <p class="text-xs text-gray-600">รหัสนักเรียนใหม่: <strong id="newlyCreatedStudentId" class="text-base text-brand-700 font-mono">-</strong></p>
+      <div>
+        <button type="button" id="btnDownloadEnrollPdf" onclick="downloadEnrollmentPdf()" 
+                class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow transition">
+          📄 ดาวน์โหลดใบมอบตัว (PDF)
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+let currentEnrollApplicant = null;
+let currentEnrollPdfId = '';
+
+function loadApplicantForEnroll() {
+  const appNo = document.getElementById('enrollSearchAppNo').value.trim();
+  const token = getAdminToken();
+
+  if (!appNo) {
+    showToast('กรุณาระบุเลขที่ใบสมัคร', 'warning');
+    return;
+  }
+
+  showLoading('กำลังค้นหาข้อมูลผู้สมัคร...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.success && res.applicant) {
+        const a = res.applicant;
+        if (a.current_status !== 'ผ่านการคัดเลือก' && a.current_status !== 'มอบตัวแล้ว') {
+          showToast(`ผู้สมัครนี้มีสถานะเป็น "${a.current_status}" ยังไม่สามารถทำการมอบตัวได้ (ต้องผ่านการคัดเลือกก่อน)`, 'warning');
+          return;
+        }
+
+        currentEnrollApplicant = a;
+        document.getElementById('enrollStudentName').textContent = `${a.title}${a.first_name} ${a.last_name}`;
+        document.getElementById('enrollCitizenId').textContent = a.citizen_id;
+        document.getElementById('enrollLevel').textContent = a.education_level;
+        document.getElementById('enrollMajor').textContent = a.quota_major_1;
+        document.getElementById('guardian_name').value = a.father_name || a.mother_name || '';
+        document.getElementById('guardian_phone').value = a.phone || '';
+
+        // ดึงเลขรหัสถัดไป
+        document.getElementById('enrollStudentId').value = '';
+        document.getElementById('enrollmentForm').classList.remove('hidden');
+        document.getElementById('enrollSuccessBox').classList.add('hidden');
+      } else {
+        showToast('ไม่พบข้อมูลใบสมัครเลขที่นี้', 'error');
+      }
+    })
+    .apiGetApplicantDetails(appNo, token);
+}
+
+function submitEnrollment(e) {
+  e.preventDefault();
+  if (!currentEnrollApplicant) return;
+
+  const token = getAdminToken();
+  const payload = {
+    application_no: currentEnrollApplicant.application_no,
+    student_id: document.getElementById('enrollStudentId').value.trim(),
+    assigned_major: currentEnrollApplicant.quota_major_1,
+    guardian_name: document.getElementById('guardian_name').value.trim(),
+    guardian_relation: document.getElementById('guardian_relation').value,
+    guardian_phone: document.getElementById('guardian_phone').value.trim(),
+    guardian_occupation: document.getElementById('guardian_occupation').value.trim(),
+    witness_1_name: document.getElementById('witness_1_name').value.trim(),
+    witness_2_name: document.getElementById('witness_2_name').value.trim()
+  };
+
+  showLoading('กำลังบันทึกการมอบตัวและสร้างเอกสาร PDF...');
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      hideLoading();
+      if (res.success) {
+        currentEnrollPdfId = res.enrollPdfId;
+        document.getElementById('newlyCreatedStudentId').textContent = res.studentId;
+        document.getElementById('enrollmentForm').classList.add('hidden');
+        document.getElementById('enrollSuccessBox').classList.remove('hidden');
+        showToast(res.message, 'success');
+        loadDashboardData();
+      } else {
+        showToast(res.message, 'error');
+      }
+    })
+    .withFailureHandler(function(err) {
+      hideLoading();
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    })
+    .apiEnrollApplicant(payload, token);
+}
+
+function downloadEnrollmentPdf() {
+  if (!currentEnrollPdfId) {
+    showToast('ไม่พบไฟล์ PDF ใบมอบตัว', 'warning');
+    return;
+  }
+  const url = `<?= ScriptApp.getService().getUrl() ?>?action=download_pdf&id=${currentEnrollPdfId}`;
+  window.open(url, '_blank');
+}
+</script>
+
+<!-- END admin_enrollment -->
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- Footer -->
+  <!-- ============================================================== -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-xs text-slate-500 mt-auto">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        <p class="font-bold text-slate-700">วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์</p>
+        <p>เลขที่ 1 หมู่ 3 ถนนบ้านหมอ-ท่าลาน ตำบลบ้านครัว อำเภอบ้านหมอ จังหวัดสระบุรี 18270</p>
+        <p class="mt-0.5">โทรศัพท์ 0-3620-1365 | งานทะเบียนและวัดผล</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <button type="button" onclick="openPdpaModal()" class="text-brand-600 hover:underline font-semibold">
+          นโยบายความเป็นส่วนตัว (PDPA)
+        </button>
+        <span>•</span>
+        <span>ระบบรับสมัครโควตา v2570.1</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal นโยบายความเป็นส่วนตัว (PDPA) -->
+  
+<!-- BEGIN pdpa_modal -->
+<!-- Modal นโยบายความเป็นส่วนตัว (PDPA Modal) -->
+<div id="pdpaModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-2xl w-full p-6 md:p-8 shadow-2xl relative max-h-[90vh] flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🔒</span>
+        <h3 class="text-xl font-bold text-gray-900">นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูลส่วนบุคคล (PDPA)</h3>
+      </div>
+      <button type="button" onclick="closePdpaModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+    </div>
+
+    <!-- Body Scrollable -->
+    <div class="overflow-y-auto py-4 space-y-4 text-sm text-gray-700 flex-1 leading-relaxed">
+      <p class="font-medium text-brand-700">
+        วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์ ตระหนักถึงความสำคัญของการคุ้มครองข้อมูลส่วนบุคคลของผู้สมัครและผู้ปกครอง ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) จึงขอแจ้งรายละเอียดดังต่อไปนี้:
+      </p>
+
+      <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
+        <h4 class="font-bold text-gray-900">1. วัตถุประสงค์ในการเก็บรวบรวมและใช้ข้อมูล</h4>
+        <ul class="list-disc list-inside space-y-1 text-gray-600">
+          <li>เพื่อใช้ในการคัดเลือกเพื่อศึกษาต่อเป็นกรณีพิเศษ (โควตา) ประจำปีการศึกษา 2570</li>
+          <li>เพื่อการตรวจสอบคุณสมบัติ ผลการเรียน และเอกสารหลักฐานทางการศึกษา</li>
+          <li>เพื่อการติดต่อสื่อสาร แจ้งผลการคัดเลือก รายงานตัว และการมอบตัวเป็นนักเรียน-นักศึกษา</li>
+          <li>เพื่อการนำเข้าข้อมูลเข้าสู่ระบบทะเบียนและประมวลผลทางการศึกษา (เช่น ระบบ ศธ.02)</li>
+        </ul>
+      </div>
+
+      <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
+        <h4 class="font-bold text-gray-900">2. ข้อมูลส่วนบุคคลที่จัดเก็บ</h4>
+        <p class="text-gray-600">ข้อมูลทั่วไป (ชื่อ-นามสกุล, เลขประจำตัวประชาชน 13 หลัก, วันเดือนปีเกิด), ข้อมูลการติดต่อ (ที่อยู่, โทรศัพท์, อีเมล), ข้อมูลบิดา-มารดาหรือผู้ปกครอง, ผลการเรียน (GPAX), เอกสารหลักฐานทางการศึกษาและรูปถ่ายประจำตัว</p>
+      </div>
+
+      <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
+        <h4 class="font-bold text-gray-900">3. ระยะเวลาการเก็บรักษาข้อมูล</h4>
+        <p class="text-gray-600">ข้อมูลของผู้ที่ผ่านการคัดเลือกจะถูกเก็บรักษาตลอดระยะเวลาการศึกษาจนสำเร็จการศึกษา และสำหรับผู้ที่ไม่ผ่านการคัดเลือก ข้อมูลจะถูกเก็บรักษาไม่เกิน 1 ปีการศึกษาเพื่อการตรวจสอบทางสถิติและจะทำลายอย่างปลอดภัย</p>
+      </div>
+
+      <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
+        <h4 class="font-bold text-gray-900">4. สิทธิของเจ้าของข้อมูลส่วนบุคคล</h4>
+        <p class="text-gray-600">ท่านมีสิทธิในการขอเข้าถึง ขอรับสำเนา ขอแก้ไขข้อมูลให้ถูกต้อง หรือขอลบข้อมูลตามที่กฎหมายกำหนด โดยติดต่อได้ที่งานทะเบียนและวัดผล วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="pt-4 border-t border-gray-200 flex justify-end gap-3">
+      <button type="button" onclick="closePdpaModal()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-xl transition">
+        รับทราบและเข้าใจแล้ว
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openPdpaModal() {
+  document.getElementById('pdpaModal').classList.remove('hidden');
+}
+function closePdpaModal() {
+  document.getElementById('pdpaModal').classList.add('hidden');
+}
+</script>
+
+<!-- END pdpa_modal -->
+
+
+  <!-- ============================================================== -->
+  <!-- Toast Notification Container -->
+  <!-- ============================================================== -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- ============================================================== -->
+  <!-- Loading Spinner Overlay -->
+  <!-- ============================================================== -->
+  <div id="loadingOverlay" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex flex-col items-center justify-center text-white">
+    <div class="bg-white text-slate-800 p-6 rounded-3xl shadow-2xl flex flex-col items-center gap-3 max-w-xs text-center border border-slate-100">
+      <div class="spinner"></div>
+      <p id="loadingMessage" class="text-xs font-bold text-slate-700">กำลังประมวลผล กรุณารอสักครู่...</p>
+    </div>
+  </div>
+
+  <!-- Global Application Scripts -->
+  <script>
+    /**
+     * สลับแท็บหลัก (form, status, admin)
+     */
+    function switchToTab(tabName) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-tab').forEach(el => {
+        el.classList.remove('bg-brand-50', 'text-brand-700', 'font-bold');
+        el.classList.add('text-slate-600', 'font-semibold');
+      });
+
+      const content = document.getElementById(`tab-${tabName}-content`);
+      if (content) content.classList.remove('hidden');
+
+      if (tabName === 'form') {
+        const tabBtn = document.getElementById('navTabForm');
+        if (tabBtn) tabBtn.classList.add('bg-brand-50', 'text-brand-700', 'font-bold');
+      } else if (tabName === 'status') {
+        const tabBtn = document.getElementById('navTabStatus');
+        if (tabBtn) tabBtn.classList.add('bg-brand-50', 'text-brand-700', 'font-bold');
+      } else if (tabName === 'admin') {
+        const tabBtn = document.getElementById('navTabAdmin');
+        if (tabBtn) tabBtn.classList.add('bg-brand-50', 'text-brand-700', 'font-bold');
+        checkAdminAuth();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /**
+     * สลับแท็บย่อยฝั่งเจ้าหน้าที่
+     */
+    function switchAdminSubTab(subTabName) {
+      document.querySelectorAll('.admin-sub-view').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.admin-sub-tab').forEach(el => {
+        el.classList.remove('bg-brand-600', 'text-white', 'font-bold', 'shadow-sm');
+        el.classList.add('text-slate-600', 'font-semibold');
+      });
+
+      const target = document.getElementById(`admin-sub-${subTabName}`);
+      if (target) target.classList.remove('hidden');
+
+      const btn = document.getElementById(`adminSubTab${capitalizeFirst(subTabName)}`);
+      if (btn) btn.classList.add('bg-brand-600', 'text-white', 'font-bold', 'shadow-sm');
+
+      if (subTabName === 'dashboard') {
+        loadDashboardData();
+      } else if (subTabName === 'applicants') {
+        fetchApplicantsList(1);
+      }
+    }
+
+    function capitalizeFirst(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    /**
+     * แสดง Toast Notification
+     */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let bgClass = 'bg-slate-900 text-white';
+      let icon = 'ℹ️';
+      if (type === 'success') {
+        bgClass = 'bg-emerald-600 text-white';
+        icon = '✓';
+      } else if (type === 'error') {
+        bgClass = 'bg-red-600 text-white';
+        icon = '✕';
+      } else if (type === 'warning') {
+        bgClass = 'bg-amber-500 text-white';
+        icon = '⚠️';
+      }
+
+      toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold pointer-events-auto flex items-center gap-2 transition transform translate-y-2 opacity-0`;
+      toast.innerHTML = `<span class="font-bold">${icon}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 50);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    /**
+     * ควบคุม Loading Overlay
+     */
+    function showLoading(msg = 'กำลังประมวลผล กรุณารอสักครู่...') {
+      document.getElementById('loadingMessage').textContent = msg;
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+    }
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+
+    // เริ่มต้นระบบเมื่อหน้าเว็บโหลดเสร็จ
+    window.addEventListener('DOMContentLoaded', function() {
+      loadMajors();
+      const initialPage = '<?= initialPage ?>';
+      if (initialPage) {
+        switchToTab(initialPage);
+      }
+    });
+  </script>
+</body>
+</html>
