@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { MapPin, Phone, Mail, Globe, ShieldCheck } from 'lucide-react';
+import { MapPin, Phone, Globe, ShieldCheck } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -67,19 +67,22 @@ export default function Footer() {
             <div className="space-y-2.5 text-sm text-slate-400">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-crimson-400 mt-1 flex-shrink-0" />
-                <span>เลขที่ 100 หมู่ 1 ต.บ้านหมอ อ.บ้านหมอ จ.สระบุรี 18130</span>
+                <span>เลขที่ 290 หมู่ 8 (บ้านท่าลาน) ตำบลบ้านครัว อำเภอบ้านหมอ จังหวัดสระบุรี 18270</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-gold-400 flex-shrink-0" />
-                <span>งานทะเบียนและวัดผล: 036-201-444</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                <span>thaluangtech@vec.mail.go.th</span>
+                <span>036-281-295</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Globe className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>www.thaluang.ac.th</span>
+                <a
+                  href="http://www.tl.ac.th/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gold-400 transition-colors underline-offset-2 hover:underline"
+                >
+                  วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์
+                </a>
               </div>
             </div>
           </div>
